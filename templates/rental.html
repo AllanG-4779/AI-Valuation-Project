@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Rental Estimate — AI Property Valuation</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="form-page">
+
+    <a href="/" class="back-link">← Back home</a>
+
+    <div class="form-header">
+
+        <p class="eyebrow">Rental valuation</p>
+
+        <h1>What should it<span> rent for</span>?</h1>
+
+        <p class="subtext">
+            Answer a few questions about the property and our model will estimate
+            a fair monthly rental price.
+        </p>
+
+    </div>
+
+
+    <form method="POST" class="valuation-form">
+
+
+        <!-- Step 01 -->
+        <div class="form-section">
+
+            <div class="section-label">
+                <span class="num">01</span>
+                <h3>Property type &amp; location</h3>
+            </div>
+
+            <div class="field-grid">
+
+                <div class="field">
+                    <label>Property type</label>
+                    <select name="property_type" class="field-control">
+                        <option>Apartment</option>
+                        <option>Studio</option>
+                        <option>Bungalow</option>
+                        <option>Townhouse</option>
+                        <option>Villa</option>
+                        <option>Maisonette</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Town</label>
+                    <select name="town" class="field-control">
+                        <option>Nairobi</option>
+                        <option>Kiambu</option>
+                        <option>Mombasa</option>
+                        <option>Nakuru</option>
+                        <option>Kisumu</option>
+                        <option>Eldoret</option>
+                    </select>
+                </div>
+
+                <div class="field field-wide">
+                    <label>Neighborhood</label>
+                    <input
+                    name="neighborhood"
+                    class="field-control"
+                    placeholder="e.g. Donholm"
+                    required>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Step 02 -->
+        <div class="form-section">
+
+            <div class="section-label">
+                <span class="num">02</span>
+                <h3>Size &amp; layout</h3>
+            </div>
+
+            <div class="field-grid">
+
+                <div class="field field-narrow">
+                    <label>Bedrooms</label>
+                    <input type="number" name="bedrooms" class="field-control" value="3">
+                </div>
+
+                <div class="field field-narrow">
+                    <label>Bathrooms</label>
+                    <input type="number" name="bathrooms" class="field-control" value="2">
+                </div>
+
+                <div class="field">
+                    <label>Floor size (sqm)</label>
+                    <input type="number" name="floor_size_sqm" class="field-control" value="120">
+                </div>
+
+                <div class="field">
+                    <label>Year built</label>
+                    <input type="number" name="year_built" class="field-control" value="2020">
+                </div>
+
+                <div class="field field-narrow">
+                    <label>Parking spaces</label>
+                    <input type="number" name="parking_spaces" class="field-control" value="1">
+                </div>
+
+                <div class="field field-narrow">
+                    <label>Floor number</label>
+                    <input type="number" name="floor_number" class="field-control" value="1">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Step 03 -->
+        <div class="form-section">
+
+            <div class="section-label">
+                <span class="num">03</span>
+                <h3>Condition &amp; finish</h3>
+            </div>
+
+            <div class="field-grid">
+
+                <div class="field">
+                    <label>Condition</label>
+                    <select name="condition" class="field-control">
+                        <option>Excellent</option>
+                        <option>Good</option>
+                        <option>Fair</option>
+                        <option>New</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Furnishing</label>
+                    <select name="furnishing" class="field-control">
+                        <option>Furnished</option>
+                        <option>Semi-Furnished</option>
+                        <option>Unfurnished</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Step 04 -->
+        <div class="form-section">
+
+            <div class="section-label">
+                <span class="num">04</span>
+                <h3>Features</h3>
+            </div>
+
+            <p class="section-hint">Select everything that applies</p>
+
+            <div class="chip-grid">
+
+                <input type="checkbox" id="pool" name="has_swimming_pool" value="1" class="chip-input">
+                <label for="pool" class="chip">Swimming Pool</label>
+
+                <input type="checkbox" id="gym" name="has_gym" value="1" class="chip-input">
+                <label for="gym" class="chip">Gym</label>
+
+                <input type="checkbox" id="security" name="has_security" value="1" class="chip-input">
+                <label for="security" class="chip">Security</label>
+
+                <input type="checkbox" id="garden" name="has_garden" value="1" class="chip-input">
+                <label for="garden" class="chip">Garden</label>
+
+                <input type="checkbox" id="borehole" name="has_borehole" value="1" class="chip-input">
+                <label for="borehole" class="chip">Borehole</label>
+
+                <input type="checkbox" id="generator" name="has_backup_generator" value="1" class="chip-input">
+                <label for="generator" class="chip">Generator</label>
+
+                <input type="checkbox" id="gated" name="is_gated_community" value="1" class="chip-input">
+                <label for="gated" class="chip">Gated Community</label>
+
+            </div>
+
+        </div>
+
+
+        <div class="submit-row">
+
+            <button type="submit" class="primary-btn submit-btn">
+                Estimate monthly rent
+            </button>
+
+            <p class="submit-hint">You'll see your estimate on the next screen</p>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

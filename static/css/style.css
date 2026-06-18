@@ -1,0 +1,784 @@
+/* ============================================
+   AI Property Valuation Kenya — Brown & Gold
+   ============================================ */
+
+:root{
+
+    --brown-950: #1C140D;   /* near-black espresso */
+    --brown-800: #3E2A1C;   /* deep coffee */
+    --brown-600: #6B4A30;   /* warm mid brown */
+    --gold:       #C9A24B;  /* primary accent */
+    --gold-light: #E4C77A;  /* hover/lighter gold */
+    --cream:      #F5E9D8;  /* text on dark */
+    --white:      #FFFFFF;
+
+}
+
+
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+
+
+body{
+
+    font-family:'Inter', sans-serif;
+    background:var(--cream);
+    color:var(--brown-950);
+
+}
+
+
+/* ---------- Hero ---------- */
+
+.hero{
+
+    position:relative;
+
+    min-height:100vh;
+
+    display:flex;
+    align-items:center;
+
+    background-image:url('../images/hero-house.jpg');
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    overflow:hidden;
+
+}
+
+
+.hero-overlay{
+
+    position:absolute;
+
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+
+    background:linear-gradient(
+        120deg,
+        rgba(28,20,13,0.92) 0%,
+        rgba(28,20,13,0.78) 40%,
+        rgba(28,20,13,0.45) 75%,
+        rgba(28,20,13,0.25) 100%
+    );
+
+    z-index:1;
+
+}
+
+
+.hero-text{
+
+    position:relative;
+    z-index:2;
+
+    max-width:640px;
+
+    padding:0 60px;
+
+}
+
+
+.hero-text h1{
+
+    font-size:56px;
+    font-weight:800;
+    line-height:1.15;
+
+    color:var(--cream);
+
+}
+
+
+.hero-text h1 span{
+
+    color:var(--gold);
+    font-style:italic;
+
+}
+
+
+.hero-text p{
+
+    margin-top:22px;
+
+    font-size:19px;
+    font-weight:400;
+
+    color:var(--cream);
+    opacity:.85;
+
+    max-width:480px;
+
+}
+
+
+/* ---------- Buttons ---------- */
+
+.primary-btn{
+
+    display:inline-block;
+
+    margin-top:36px;
+
+    padding:16px 38px;
+
+    background:var(--gold);
+    color:var(--brown-950);
+
+    font-weight:600;
+    font-size:16px;
+
+    border-radius:8px;
+    text-decoration:none;
+
+    letter-spacing:.3px;
+
+    transition:background .25s ease, transform .25s ease;
+
+}
+
+
+.primary-btn:hover{
+
+    background:var(--gold-light);
+    transform:translateY(-2px);
+
+}
+
+
+.hero-buttons{
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+
+    margin-top:36px;
+
+}
+
+
+.hero-buttons .primary-btn,
+.hero-buttons .secondary-btn{
+
+    margin-top:0;
+
+}
+
+
+.secondary-btn{
+
+    display:inline-block;
+
+    padding:16px 38px;
+
+    background:transparent;
+    color:var(--cream);
+
+    font-weight:600;
+    font-size:16px;
+
+    border:1.5px solid var(--cream);
+    border-radius:8px;
+
+    text-decoration:none;
+
+    letter-spacing:.3px;
+
+    transition:background .25s ease, border-color .25s ease, transform .25s ease;
+
+}
+
+
+.secondary-btn:hover{
+
+    background:rgba(245,233,216,0.1);
+    border-color:var(--gold);
+    transform:translateY(-2px);
+
+}
+
+
+/* ---------- Footer ---------- */
+
+.site-footer{
+
+    padding:28px 24px;
+
+    text-align:center;
+
+    background:var(--brown-950);
+
+}
+
+
+.site-footer p{
+
+    color:var(--cream);
+    opacity:.6;
+
+    font-size:13.5px;
+    letter-spacing:.2px;
+
+}
+
+
+/* ============================================
+   Result page (result.html)
+   ============================================ */
+
+.result-page{
+
+    min-height:80vh;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:60px 24px;
+
+}
+
+
+.result-card{
+
+    max-width:560px;
+    width:100%;
+
+    background:var(--white);
+
+    border-radius:22px;
+
+    padding:56px 48px;
+
+    text-align:center;
+
+    box-shadow:0 12px 40px rgba(28,20,13,0.1);
+
+    border:1px solid rgba(28,20,13,0.06);
+
+}
+
+
+.result-card .eyebrow{
+
+    color:var(--gold);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+
+    margin-bottom:14px;
+
+}
+
+
+.result-card h1{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:34px;
+
+    color:var(--brown-950);
+
+}
+
+
+.result-subtext{
+
+    margin-top:12px;
+
+    font-size:15.5px;
+
+    color:var(--brown-600);
+
+}
+
+
+.price-box{
+
+    margin:36px 0;
+
+    padding:32px 20px;
+
+    background:var(--brown-950);
+
+    border-radius:16px;
+
+}
+
+
+.price-box .currency{
+
+    display:block;
+
+    font-size:14px;
+    font-weight:600;
+
+    letter-spacing:2px;
+
+    color:var(--gold);
+
+    margin-bottom:6px;
+
+}
+
+
+.price-box .price{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:48px;
+
+    color:var(--cream);
+
+}
+
+
+.result-info{
+
+    font-size:14.5px;
+    line-height:1.6;
+
+    color:var(--brown-600);
+
+    max-width:440px;
+    margin:0 auto;
+
+}
+
+
+.result-actions{
+
+    margin-top:32px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+
+}
+
+
+.result-actions .primary-btn{
+
+    margin-top:0;
+
+}
+
+
+@media (max-width: 480px){
+
+    .result-card{
+
+        padding:40px 28px;
+
+    }
+
+    .result-card h1{
+
+        font-size:27px;
+
+    }
+
+    .price-box .price{
+
+        font-size:36px;
+
+    }
+
+}
+
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 768px){
+
+    .hero-text{
+
+        padding:0 28px;
+
+    }
+
+    .hero-text h1{
+
+        font-size:38px;
+
+    }
+
+    .hero-text p{
+
+        font-size:17px;
+
+    }
+
+}
+
+
+/* ============================================
+   Valuation Forms (sale.html / rental.html)
+   ============================================ */
+
+.form-page{
+
+    max-width:760px;
+    margin:0 auto;
+
+    padding:56px 24px 100px;
+
+}
+
+
+.back-link{
+
+    display:inline-block;
+
+    margin-bottom:40px;
+
+    color:var(--brown-600);
+    text-decoration:none;
+    font-weight:500;
+    font-size:15px;
+
+    transition:color .2s ease;
+
+}
+
+
+.back-link:hover{
+
+    color:var(--gold);
+
+}
+
+
+.form-header{
+
+    margin-bottom:48px;
+
+}
+
+
+.form-header .eyebrow{
+
+    color:var(--gold);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+
+    margin-bottom:14px;
+
+}
+
+
+.form-header h1{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:42px;
+    line-height:1.2;
+
+    color:var(--brown-950);
+
+}
+
+
+.form-header h1 span{
+
+    color:var(--gold);
+    font-style:italic;
+
+}
+
+
+.form-header .subtext{
+
+    margin-top:16px;
+
+    font-size:17px;
+    color:var(--brown-600);
+
+    max-width:520px;
+
+}
+
+
+/* ---- Sections ---- */
+
+.form-section{
+
+    background:var(--white);
+
+    border-radius:18px;
+
+    padding:36px;
+
+    margin-bottom:24px;
+
+    box-shadow:0 4px 24px rgba(28,20,13,0.06);
+
+    border:1px solid rgba(28,20,13,0.06);
+
+}
+
+
+.section-label{
+
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    margin-bottom:28px;
+
+}
+
+
+.section-label .num{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:15px;
+
+    color:var(--gold);
+
+    border:1.5px solid var(--gold);
+    border-radius:50%;
+
+    width:32px;
+    height:32px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+}
+
+
+.section-label h3{
+
+    font-size:19px;
+    font-weight:700;
+
+    color:var(--brown-950);
+
+}
+
+
+.section-hint{
+
+    margin-top:-18px;
+    margin-bottom:20px;
+
+    font-size:14px;
+    color:var(--brown-600);
+
+}
+
+
+/* ---- Field grid ---- */
+
+.field-grid{
+
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:22px;
+
+}
+
+
+.field-wide{
+
+    grid-column:1 / -1;
+
+}
+
+
+.field-narrow{
+
+    grid-column:span 1;
+
+}
+
+
+.field label{
+
+    display:block;
+
+    font-size:13px;
+    font-weight:600;
+
+    color:var(--brown-800);
+
+    margin-bottom:8px;
+
+    letter-spacing:.2px;
+
+}
+
+
+.field-control{
+
+    width:100%;
+
+    padding:13px 16px;
+
+    border:1.5px solid #E7DDD0;
+    border-radius:10px;
+
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+
+    color:var(--brown-950);
+
+    background:var(--cream);
+
+    transition:border-color .2s ease, box-shadow .2s ease;
+
+}
+
+
+.field-control:focus{
+
+    outline:none;
+
+    border-color:var(--gold);
+
+    box-shadow:0 0 0 3px rgba(201,162,75,0.18);
+
+}
+
+
+/* ---- Chips (amenities) ---- */
+
+.chip-grid{
+
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+
+}
+
+
+.chip-input{
+
+    position:absolute;
+
+    opacity:0;
+    pointer-events:none;
+
+}
+
+
+.chip{
+
+    display:inline-flex;
+    align-items:center;
+
+    padding:11px 20px;
+
+    border:1.5px solid #E7DDD0;
+    border-radius:50px;
+
+    font-size:14px;
+    font-weight:600;
+
+    color:var(--brown-800);
+
+    background:var(--cream);
+
+    cursor:pointer;
+    user-select:none;
+
+    transition:all .2s ease;
+
+}
+
+
+.chip:hover{
+
+    border-color:var(--gold);
+
+}
+
+
+.chip-input:checked + .chip{
+
+    background:var(--brown-950);
+    border-color:var(--brown-950);
+    color:var(--gold-light);
+
+}
+
+
+/* ---- Submit ---- */
+
+.submit-row{
+
+    text-align:center;
+
+    margin-top:36px;
+
+}
+
+
+.submit-btn{
+
+    width:100%;
+
+    text-align:center;
+
+    font-size:17px;
+
+}
+
+
+.submit-hint{
+
+    margin-top:14px;
+
+    font-size:13.5px;
+
+    color:var(--brown-600);
+
+}
+
+
+@media (max-width: 640px){
+
+    .field-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    .field-narrow, .field-wide{
+
+        grid-column:1;
+
+    }
+
+    .form-header h1{
+
+        font-size:32px;
+
+    }
+
+    .form-section{
+
+        padding:26px;
+
+    }
+
+}
