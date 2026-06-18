@@ -321,10 +321,10 @@ body{
 
     display:block;
 
-    font-size:14px;
+    font-size:13px;
     font-weight:600;
 
-    letter-spacing:2px;
+    letter-spacing:1.5px;
 
     color:var(--gold);
 

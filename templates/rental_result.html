@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+    <title>Rental Valuation Result — AI Property Valuation</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+
+<body>
+
+
+<div class="result-page">
+
+    <div class="result-card">
+
+        <p class="eyebrow">Rental valuation complete</p>
+
+        <h1>Here's your estimated monthly rent</h1>
+
+        <p class="result-subtext">
+            Based on the property details and location patterns you provided
+        </p>
+
+        <div class="price-box">
+
+            <span class="currency">KES / month</span>
+            <span class="price">{{ price }}</span>
+
+        </div>
+
+        <p class="result-info">
+
+            This figure was generated using a machine learning model trained
+            on property features, location, and rental market data across Kenya.
+            It's an estimate, not a formal appraisal.
+
+        </p>
+
+        <div class="result-actions">
+
+            <a href="/rental" class="primary-btn">Value another property</a>
+            <a href="/" class="back-link">← Back home</a>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

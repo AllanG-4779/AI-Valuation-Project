@@ -52,6 +52,7 @@
                 <div class="field">
                     <label>Property type</label>
                     <select name="property_type" class="field-control">
+                        <option value="">Select property type</option>
                         <option>Apartment</option>
                         <option>Studio</option>
                         <option>Bungalow</option>
@@ -63,7 +64,8 @@
 
                 <div class="field">
                     <label>Town</label>
-                    <select name="town" class="field-control">
+                    <select id="town" name="town" class="field-control">
+                        <option value="">Select Town</option>
                         <option>Nairobi</option>
                         <option>Kiambu</option>
                         <option>Mombasa</option>
@@ -75,11 +77,9 @@
 
                 <div class="field field-wide">
                     <label>Neighborhood</label>
-                    <input
-                    name="neighborhood"
-                    class="field-control"
-                    placeholder="e.g. Donholm"
-                    required>
+                    <select id="neighborhood" name="neighborhood" class="field-control" required>
+                        <option value="">Select neighborhood</option>
+                    </select>
                 </div>
 
             </div>
@@ -227,6 +227,63 @@
 
 </footer>
 
+<script>
+
+
+document
+.getElementById("town")
+.addEventListener(
+"change",
+function(){
+
+
+    let town = this.value;
+
+
+    fetch("/get_neighborhoods/sale/" + town)
+
+    .then(response => response.json())
+
+    .then(data => {
+
+
+        let dropdown =
+        document.getElementById("neighborhood");
+
+
+        dropdown.innerHTML =
+        "";
+
+
+        data.neighborhoods.forEach(
+        function(place){
+
+
+            let option =
+            document.createElement("option");
+
+
+            option.value = place;
+
+
+            option.text =
+            place;
+
+
+            dropdown.appendChild(option);
+
+
+        });
+
+
+    });
+
+
+
+});
+
+
+</script>
 
 </body>
 

@@ -3,8 +3,7 @@ import pandas as pd
 
 def prepare_sale_input(data, encoders):
 
-
-    text_columns = [
+    for column in [
 
         "property_type",
         "neighborhood",
@@ -13,20 +12,30 @@ def prepare_sale_input(data, encoders):
         "furnishing",
         "location_tier"
 
-    ]
-
-
-
-    for column in text_columns:
-
+    ]:
 
         data[column] = encoders[column].transform(
             [data[column]]
         )[0]
 
+    return pd.DataFrame([data])
 
 
-    df = pd.DataFrame([data])
+def prepare_rental_input(data, encoders):
 
+    for column in [
 
-    return df
+        "property_type",
+        "neighborhood",
+        "town",
+        "condition",
+        "furnishing",
+        "location_tier"
+
+    ]:
+
+        data[column] = encoders[column].transform(
+            [data[column]]
+        )[0]
+
+    return pd.DataFrame([data])
