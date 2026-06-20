@@ -1,25 +1,117 @@
 <!DOCTYPE html>
+
 <html>
-    <head>
-        <title>AI Property Valuation Kenya</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    </head>
-    
-    <body>
-        <section class="hero">
-            <div class="hero-overlay"></div>
-            <div class="hero-text">
-                <h1>Know your property's<span> true value </span>with AI</h1>
-                <p>AI-powered property valuation built for the Kenyan real estate market.</p>
-                <div class="hero-buttons">
-                    <a href="/sale" class="primary-btn">Estimate Sale Price</a>
-                    <a href="/rental"class="secondary-btn">Estimate Rental Price</a>
-                </div>
-            </div>
-        </section>
-        <footer class="site-footer">
-            <p>PropAI · AI-powered property valuations for the Kenyan market</p>
-        </footer>
-    </body>
+
+
+<head>
+
+
+<title>
+AI Property Valuation Kenya
+</title>
+
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/style.css') }}">
+
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
+rel="stylesheet">
+
+
+</head>
+
+
+
+
+<body>
+
+
+<div class="auth-bar">
+
+    {% if current_user.is_authenticated %}
+
+        <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+        <a href="/logout" class="auth-link">Log out</a>
+
+    {% else %}
+
+        <a href="/login" class="auth-link">Log in</a>
+        <a href="/register" class="auth-link auth-link-filled">Register</a>
+
+    {% endif %}
+
+</div>
+
+
+
+<section class="hero">
+
+
+<div class="hero-overlay"></div>
+
+
+<div class="hero-text">
+
+
+<h1>
+
+Know your property's
+
+<span>
+true value
+</span>
+
+with AI
+
+
+</h1>
+
+
+
+<p>
+
+
+AI-powered property valuation built for the Kenyan real estate market.
+
+
+</p>
+
+
+
+
+<div class="hero-buttons">
+
+{% if current_user.is_authenticated %}
+
+    <a href="/sale" class="primary-btn">Estimate Sale Price</a>
+    <a href="/rental" class="secondary-btn">Estimate Rental Price</a>
+
+{% else %}
+
+    <a href="/login" class="primary-btn">Start Valuation</a>
+
+{% endif %}
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
 </html>
