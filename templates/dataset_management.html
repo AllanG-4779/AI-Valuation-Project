@@ -41,7 +41,7 @@
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
-            <div class="form-error">
+            <div class="form-error {% if 'successfully' in messages[0] %}form-success{% endif %}">
                 {% for message in messages %}
                     <p>{{ message }}</p>
                 {% endfor %}
@@ -62,6 +62,29 @@
         </a>
 
     </div>
+
+
+    <!-- Search -->
+
+    <form method="GET" action="{{ url_for('dataset_management') }}" class="dataset-search-form">
+
+        <input type="hidden" name="dataset" value="{{ dataset_type }}">
+
+        <input
+        type="text"
+        name="q"
+        class="field-control dataset-search-input"
+        placeholder="Search by neighborhood or town..."
+        value="{{ search_query }}">
+
+        <button type="submit" class="primary-btn dataset-search-btn">Search</button>
+
+        {% if search_query %}
+            <a href="{{ url_for('dataset_management', dataset=dataset_type) }}" class="back-link dataset-clear-link">Clear</a>
+        {% endif %}
+
+    </form>
+
 
     <div class="admin-table-wrap">
 
@@ -85,23 +108,62 @@
                 </tr>
                 {% endfor %}
 
+                {% if rows|length == 0 %}
+                <tr>
+                    <td colspan="{{ columns|length }}" class="empty-table-cell">
+                        No rows match your search.
+                    </td>
+                </tr>
+                {% endif %}
+
             </tbody>
 
         </table>
 
     </div>
 
-    <p class="metrics-note">
-        Showing the first {{ rows|length }} of {{ total_rows }} rows.
-    </p>
+
+    <!-- Pagination -->
+
+    <div class="pagination">
+
+        <p class="pagination-info">
+            Showing rows {{ start_row }}–{{ end_row }} of {{ total_rows }}
+        </p>
+
+        <div class="pagination-controls">
+
+            {% if page > 1 %}
+                <a href="{{ url_for('dataset_management', dataset=dataset_type, q=search_query, page=page-1) }}" class="table-btn">← Previous</a>
+            {% endif %}
+
+            <span class="pagination-page">Page {{ page }} of {{ total_pages }}</span>
+
+            {% if page < total_pages %}
+                <a href="{{ url_for('dataset_management', dataset=dataset_type, q=search_query, page=page+1) }}" class="table-btn">Next →</a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <!-- Add a new neighborhood (location facts only) -->
 
     <div class="form-section add-row-section">
 
         <div class="section-label">
-            <h3>Add a new property record</h3>
+            <h3>Add a new neighborhood</h3>
         </div>
 
-        <form method="POST" action="{{ url_for('add_property_row') }}" class="valuation-form">
+        <p class="section-hint">
+            Only use this if the neighborhood genuinely doesn't exist yet in the
+            dropdown below. This defines its location facts once — every future
+            listing in this neighborhood will reuse these same values automatically,
+            so they always stay consistent.
+        </p>
+
+        <form method="POST" action="{{ url_for('add_neighborhood') }}" class="valuation-form">
 
             <input type="hidden" name="dataset_type" value="{{ dataset_type }}">
 
@@ -109,11 +171,19 @@
 
                 <div class="field">
                     <label>Town</label>
-                    <input name="town" class="field-control" placeholder="e.g. Nairobi" required>
+                    <select name="town" class="field-control" required>
+                        <option value="">Select town</option>
+                        <option>Nairobi</option>
+                        <option>Kiambu</option>
+                        <option>Mombasa</option>
+                        <option>Nakuru</option>
+                        <option>Kisumu</option>
+                        <option>Eldoret</option>
+                    </select>
                 </div>
 
                 <div class="field">
-                    <label>Neighborhood</label>
+                    <label>Neighborhood name</label>
                     <input name="neighborhood" class="field-control" placeholder="e.g. Donholm" required>
                 </div>
 
@@ -130,6 +200,71 @@
                         <option value="upper_mid">Upper Mid</option>
                         <option value="premium">Premium</option>
                     </select>
+                </div>
+
+            </div>
+
+            <button type="submit" class="secondary-btn-dark add-row-submit">
+                Save new neighborhood
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- Add a property listing (uses an existing neighborhood) -->
+
+    <div class="form-section add-row-section">
+
+        <div class="section-label">
+            <h3>Add a property listing</h3>
+        </div>
+
+        <p class="section-hint">
+            Pick an existing town and neighborhood — location details fill in
+            automatically and can't be edited here, so listings always match
+            the neighborhood's real location data.
+        </p>
+
+        <form method="POST" action="{{ url_for('add_property_row') }}" class="valuation-form" id="add-listing-form">
+
+            <input type="hidden" name="dataset_type" value="{{ dataset_type }}">
+
+            <div class="field-grid">
+
+                <div class="field">
+                    <label>Town</label>
+                    <select id="listing-town" name="town" class="field-control" required>
+                        <option value="">Select town</option>
+                        <option>Nairobi</option>
+                        <option>Kiambu</option>
+                        <option>Mombasa</option>
+                        <option>Nakuru</option>
+                        <option>Kisumu</option>
+                        <option>Eldoret</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Neighborhood</label>
+                    <select id="listing-neighborhood" name="neighborhood" class="field-control" required>
+                        <option value="">Select town first</option>
+                    </select>
+                    <label class="checkbox-inline-label">
+                        <input type="checkbox" id="new-neighborhood-toggle">
+                        This neighborhood isn't listed — let me enter it manually
+                    </label>
+                </div>
+
+                <div class="field field-narrow">
+                    <label>Distance to CBD (km)</label>
+                    <input id="listing-distance" type="text" class="field-control" disabled placeholder="Auto-filled">
+                </div>
+
+                <div class="field field-narrow">
+                    <label>Location tier</label>
+                    <input id="listing-tier" type="text" class="field-control" disabled placeholder="Auto-filled">
                 </div>
 
                 <div class="field">
@@ -227,8 +362,15 @@
 
             </div>
 
+            <!-- Hidden fields actually submitted with the listing —
+                 mirrors the disabled, auto-filled display fields above,
+                 since disabled inputs don't get sent with a form submit. -->
+
+            <input type="hidden" id="listing-distance-hidden" name="distance_to_cbd_km">
+            <input type="hidden" id="listing-tier-hidden" name="location_tier">
+
             <button type="submit" class="primary-btn submit-btn add-row-submit">
-                Add record to dataset
+                Add listing
             </button>
 
         </form>
@@ -244,6 +386,138 @@
     <p>PropAI · AI-powered property valuations for the Kenyan market</p>
 
 </footer>
+
+
+<script>
+
+const datasetType = "{{ dataset_type }}";
+
+document.getElementById("listing-town").addEventListener("change", function () {
+
+    const town = this.value;
+
+    const neighborhoodSelect = document.getElementById("listing-neighborhood");
+    const distanceField = document.getElementById("listing-distance");
+    const tierField = document.getElementById("listing-tier");
+    const distanceHidden = document.getElementById("listing-distance-hidden");
+    const tierHidden = document.getElementById("listing-tier-hidden");
+
+    neighborhoodSelect.innerHTML = "<option value=''>Loading...</option>";
+    distanceField.value = "";
+    tierField.value = "";
+    distanceHidden.value = "";
+    tierHidden.value = "";
+
+    if (!town) {
+        neighborhoodSelect.innerHTML = "<option value=''>Select town first</option>";
+        return;
+    }
+
+    fetch("/get_neighborhood_details/" + datasetType + "/" + town)
+        .then(response => response.json())
+        .then(data => {
+
+            neighborhoodSelect.innerHTML = "<option value=''>Select neighborhood</option>";
+
+            data.neighborhoods.forEach(function (place) {
+                const option = document.createElement("option");
+                option.value = place.neighborhood;
+                option.text = place.neighborhood;
+                option.dataset.distance = place.distance_to_cbd_km;
+                option.dataset.tier = place.location_tier;
+                neighborhoodSelect.appendChild(option);
+            });
+
+        });
+
+});
+
+document.getElementById("listing-neighborhood").addEventListener("change", function () {
+
+    const selectedOption = this.options[this.selectedIndex];
+
+    const distanceField = document.getElementById("listing-distance");
+    const tierField = document.getElementById("listing-tier");
+    const distanceHidden = document.getElementById("listing-distance-hidden");
+    const tierHidden = document.getElementById("listing-tier-hidden");
+
+    if (selectedOption && selectedOption.dataset.distance) {
+        distanceField.value = selectedOption.dataset.distance;
+        tierField.value = selectedOption.dataset.tier;
+        distanceHidden.value = selectedOption.dataset.distance;
+        tierHidden.value = selectedOption.dataset.tier;
+    } else {
+        distanceField.value = "";
+        tierField.value = "";
+        distanceHidden.value = "";
+        tierHidden.value = "";
+    }
+
+});
+
+// Escape hatch for genuinely new neighborhoods that don't exist yet,
+// so they can't appear in the dropdown above (it's only populated from
+// neighborhoods that already have at least one listing in the CSV).
+
+document.getElementById("new-neighborhood-toggle").addEventListener("change", function () {
+
+    const neighborhoodSelect = document.getElementById("listing-neighborhood");
+    const distanceField = document.getElementById("listing-distance");
+    const tierField = document.getElementById("listing-tier");
+
+    if (this.checked) {
+
+        // Swap the dropdown for a free-text input
+        const manualInput = document.createElement("input");
+        manualInput.type = "text";
+        manualInput.name = "neighborhood";
+        manualInput.id = "listing-neighborhood";
+        manualInput.className = "field-control";
+        manualInput.placeholder = "Type the new neighborhood name";
+        manualInput.required = true;
+
+        neighborhoodSelect.parentNode.replaceChild(manualInput, neighborhoodSelect);
+
+        distanceField.disabled = false;
+        distanceField.placeholder = "e.g. 12.5";
+        distanceField.removeAttribute("readonly");
+
+        tierField.disabled = true;
+
+        const tierSelect = document.createElement("select");
+        tierSelect.id = "listing-tier";
+        tierSelect.className = "field-control";
+        tierSelect.innerHTML = `
+            <option value="affordable">Affordable</option>
+            <option value="mid" selected>Mid</option>
+            <option value="upper_mid">Upper Mid</option>
+            <option value="premium">Premium</option>
+        `;
+        tierField.parentNode.replaceChild(tierSelect, tierField);
+
+        // Keep hidden fields in sync manually since these are now real
+        // user-editable inputs, not auto-filled disabled displays.
+        document.getElementById("listing-distance").addEventListener("input", function () {
+            document.getElementById("listing-distance-hidden").value = this.value;
+        });
+
+        tierSelect.addEventListener("change", function () {
+            document.getElementById("listing-tier-hidden").value = this.value;
+        });
+
+        document.getElementById("listing-tier-hidden").value = tierSelect.value;
+
+    } else {
+
+        // Reload the page to cleanly reset back to dropdown mode —
+        // simpler and less error-prone than reversing all the DOM swaps.
+        window.location.reload();
+
+    }
+
+});
+
+</script>
 
 
 </body>

@@ -1067,19 +1067,134 @@ def performance_monitoring():
 def dataset_management():
 
     dataset_type = request.args.get("dataset", "sale")
+    search_query = request.args.get("q", "").strip()
+    page = request.args.get("page", 1, type=int)
+
+    if page < 1:
+        page = 1
 
     df = sale_location_df if dataset_type == "sale" else rental_location_df
 
-    preview_rows = df.head(50).to_dict(orient="records")
+    if search_query:
+        mask = (
+            df["neighborhood"].astype(str).str.contains(search_query, case=False, na=False)
+            | df["town"].astype(str).str.contains(search_query, case=False, na=False)
+        )
+        filtered_df = df[mask]
+    else:
+        filtered_df = df
+
+    total_rows = len(filtered_df)
+
+    per_page = 50
+    total_pages = max(1, (total_rows + per_page - 1) // per_page)
+
+    if page > total_pages:
+        page = total_pages
+
+    start_index = (page - 1) * per_page
+    end_index = start_index + per_page
+
+    page_rows = filtered_df.iloc[start_index:end_index].to_dict(orient="records")
     columns = list(df.columns)
 
     return render_template(
         "dataset_management.html",
         dataset_type=dataset_type,
-        rows=preview_rows,
+        rows=page_rows,
         columns=columns,
-        total_rows=len(df),
+        total_rows=total_rows,
+        search_query=search_query,
+        page=page,
+        total_pages=total_pages,
+        start_row=start_index + 1 if total_rows > 0 else 0,
+        end_row=min(end_index, total_rows),
     )
+
+
+# Returns full location details (not just names) for each neighborhood in
+# a given town, so the dataset-management "add listing" form can auto-fill
+# distance/tier instead of letting an admin type them and risk inconsistency.
+
+@app.route("/get_neighborhood_details/<property_type>/<town>")
+@login_required
+@role_required("admin")
+def get_neighborhood_details(property_type, town):
+
+    lookup = sale_location_lookup if property_type == "sale" else rental_location_lookup
+
+    matches = lookup[lookup["neighborhood"].notna()]
+
+    matches = matches[
+        matches["neighborhood"].isin(
+            (sale_location_df if property_type == "sale" else rental_location_df)[
+                (sale_location_df if property_type == "sale" else rental_location_df)["town"] == town
+            ]["neighborhood"].unique()
+        )
+    ]
+
+    results = [
+        {
+            "neighborhood": row["neighborhood"],
+            "distance_to_cbd_km": row["distance_to_cbd_km"],
+            "location_tier": row["location_tier"],
+        }
+        for _, row in matches.iterrows()
+    ]
+
+    return {"neighborhoods": results}
+
+
+# Adds a brand new neighborhood's location facts (town, distance, tier) as
+# its own row context. In practice this is captured the first time a
+# listing for that neighborhood is added — this route exists so the facts
+# can be registered once, deliberately, rather than re-typed per listing.
+
+@app.route("/admin/dataset/add_neighborhood", methods=["POST"])
+@login_required
+@role_required("admin")
+def add_neighborhood():
+
+    dataset_type = request.form.get("dataset_type", "sale")
+
+    town = request.form.get("town")
+    neighborhood = request.form.get("neighborhood", "").strip()
+    distance_to_cbd_km = request.form.get("distance_to_cbd_km")
+    location_tier = request.form.get("location_tier")
+
+    csv_path = (
+        "dataset/sale_properties.csv"
+        if dataset_type == "sale"
+        else "dataset/rental_properties.csv"
+    )
+
+    try:
+        existing_df = pd.read_csv(csv_path)
+
+        already_exists = (
+            (existing_df["town"] == town)
+            & (existing_df["neighborhood"].str.lower() == neighborhood.lower())
+        ).any()
+
+        if already_exists:
+            flash(
+                f"'{neighborhood}' already exists in {town}. "
+                f"Use the listing form below instead — it will appear in the dropdown."
+            )
+            return redirect(url_for("dataset_management", dataset=dataset_type))
+
+        flash(
+            f"Noted. To actually add '{neighborhood}' in {town}, scroll to "
+            f"'Add a property listing' below, select {town}, check "
+            f"'This neighborhood isn't listed', and enter the same distance "
+            f"({distance_to_cbd_km}km) and tier ({location_tier}) when adding "
+            f"the listing — that's what creates the neighborhood."
+        )
+
+    except Exception as e:
+        flash(f"Could not check existing neighborhoods: {e}")
+
+    return redirect(url_for("dataset_management", dataset=dataset_type))
 
 
 @app.route("/admin/dataset/add", methods=["POST"])
@@ -1089,19 +1204,30 @@ def add_property_row():
 
     dataset_type = request.form.get("dataset_type", "sale")
 
-    target_col = "sale_price" if dataset_type == "sale" else "rent_price"
-
     csv_path = (
         "dataset/sale_properties.csv"
         if dataset_type == "sale"
         else "dataset/rental_properties.csv"
     )
 
+    town = request.form.get("town")
+    neighborhood = request.form.get("neighborhood")
+    distance_to_cbd_km = request.form.get("distance_to_cbd_km")
+    location_tier = request.form.get("location_tier")
+
+    if not distance_to_cbd_km or not location_tier:
+        flash(
+            "Couldn't add the listing: no location details were found for that "
+            "neighborhood. Pick a neighborhood from the dropdown after selecting "
+            "a town, or use 'Add a new neighborhood' above first."
+        )
+        return redirect(url_for("dataset_management", dataset=dataset_type))
+
     new_row = {
-        "town": request.form.get("town"),
-        "neighborhood": request.form.get("neighborhood"),
-        "distance_to_cbd_km": request.form.get("distance_to_cbd_km"),
-        "location_tier": request.form.get("location_tier"),
+        "town": town,
+        "neighborhood": neighborhood,
+        "distance_to_cbd_km": distance_to_cbd_km,
+        "location_tier": location_tier,
         "property_type": request.form.get("property_type"),
         "bedrooms": request.form.get("bedrooms"),
         "bathrooms": request.form.get("bathrooms"),
@@ -1118,18 +1244,40 @@ def add_property_row():
         "has_security": int(request.form.get("has_security", 0) or 0),
         "has_garden": int(request.form.get("has_garden", 0) or 0),
         "is_gated_community": int(request.form.get("is_gated_community", 0) or 0),
-        target_col: request.form.get("target_price"),
+        "price_ksh": request.form.get("target_price"),
+        "listing_type": "For Sale" if dataset_type == "sale" else "For Rent",
     }
 
     try:
         existing_df = pd.read_csv(csv_path)
 
-        # Only keep keys that exist as columns in the real CSV, in case
-        # your actual dataset has slightly different column names than
-        # assumed above (common columns will still be added correctly).
+        # property_id: generate the next sequential ID rather than leaving
+        # it blank/NaN, since it exists as a real column in the CSV and
+        # earlier rows show it's a simple incrementing number.
+        if "property_id" in existing_df.columns:
+            existing_ids = pd.to_numeric(existing_df["property_id"], errors="coerce")
+            next_id = int(existing_ids.max() + 1) if existing_ids.notna().any() else 1
+            new_row["property_id"] = next_id
+
+        # Diagnostic check: make sure the price field actually arrived.
+        if not new_row["price_ksh"]:
+            flash(
+                "Warning: no sale/rent price was submitted with this listing — "
+                "the row was NOT added. Check that the price field has a value "
+                "before submitting."
+            )
+            return redirect(url_for("dataset_management", dataset=dataset_type))
+
         new_row_filtered = {
             k: v for k, v in new_row.items() if k in existing_df.columns
         }
+
+        # Warn (don't silently drop) if the real CSV has columns this form
+        # never fills in, so a future mismatch like this gets caught here
+        # instead of showing up as a silent NaN three screens later.
+        missing_columns = [
+            c for c in existing_df.columns if c not in new_row_filtered
+        ]
 
         updated_df = pd.concat(
             [existing_df, pd.DataFrame([new_row_filtered])],
@@ -1138,14 +1286,23 @@ def add_property_row():
 
         updated_df.to_csv(csv_path, index=False)
 
-        flash(
-            f"Added new record to the {dataset_type} dataset. "
-            f"Restart the app or retrain the model to use it in predictions."
+        success_message = (
+            f"Added new listing in {neighborhood}, {town} to the {dataset_type} "
+            f"dataset. Retrain the model from the Model Retraining page to include "
+            f"it in future predictions."
         )
+
+        if missing_columns:
+            success_message += (
+                f" Note: this CSV has columns this form doesn't set "
+                f"({', '.join(missing_columns)}) — they were left blank for this row."
+            )
+
+        flash(success_message)
 
     except Exception as e:
 
-        flash(f"Failed to add record: {e}")
+        flash(f"Failed to add listing: {e}")
 
     return redirect(url_for("dataset_management", dataset=dataset_type))
 
