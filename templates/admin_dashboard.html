@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+    <title>Admin Dashboard — AI Property Valuation</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="auth-bar">
+
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+
+</div>
+
+
+<div class="admin-page">
+
+    <p class="eyebrow">System administrator</p>
+
+    <h1>Admin dashboard</h1>
+
+    <p class="role-home-subtext">
+        Manage datasets, retrain the valuation model, and monitor system performance.
+    </p>
+
+    <div class="admin-grid">
+
+        <a href="/admin/dataset" class="admin-card admin-card-link">
+            <h3>Dataset management</h3>
+            <p>View and update the property records used to train the model.</p>
+        </a>
+
+        <a href="/admin/retrain" class="admin-card admin-card-link">
+            <h3>Model retraining</h3>
+            <p>Trigger retraining of the sale and rental valuation models with updated data.</p>
+        </a>
+
+        <a href="/admin/performance" class="admin-card admin-card-link">
+            <h3>Performance monitoring</h3>
+            <p>View model accuracy metrics (MAE, RMSE, R²) and system usage stats.</p>
+        </a>
+
+        <a href="/admin/users" class="admin-card admin-card-link">
+            <h3>User management</h3>
+            <p>View registered users by role and manage access.</p>
+        </a>
+
+    </div>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

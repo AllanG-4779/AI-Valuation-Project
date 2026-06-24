@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+    <title>User Management — Admin</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="auth-bar">
+
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+
+</div>
+
+
+<div class="admin-page">
+
+    <a href="/admin" class="back-link">← Back to dashboard</a>
+
+    <p class="eyebrow">System administrator</p>
+
+    <h1>User management</h1>
+
+    <p class="role-home-subtext">
+        {{ users|length }} registered user{{ 's' if users|length != 1 else '' }}
+    </p>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="form-error">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="admin-table-wrap">
+
+        <table class="admin-table">
+
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+                    </td>
+                    <td>
+
+                        {% if user.id != current_user.id %}
+
+                        <form method="POST" action="{{ url_for('update_user_role', user_id=user.id) }}" class="inline-form">
+
+                            <select name="role" class="role-select">
+                                <option value="owner" {% if user.role == 'owner' %}selected{% endif %}>Owner</option>
+                                <option value="insurance" {% if user.role == 'insurance' %}selected{% endif %}>Insurance</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                            </select>
+
+                            <button type="submit" class="table-btn">Update</button>
+
+                        </form>
+
+                        {% else %}
+
+                        <span class="self-label">(you)</span>
+
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

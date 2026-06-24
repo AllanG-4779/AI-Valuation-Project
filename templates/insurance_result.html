@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+    <title>Risk Assessment Result — AI Property Valuation</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+
+<body>
+
+
+<div class="result-page">
+
+    <div class="result-card result-card-wide">
+
+        <p class="eyebrow">Risk assessment complete</p>
+
+        <h1>Valuation &amp; risk summary</h1>
+
+        <p class="result-subtext">
+            Based on the property details provided
+        </p>
+
+        <div class="price-box">
+
+            <span class="currency">Estimated value (KES)</span>
+            <span class="price">{{ price }}</span>
+
+        </div>
+
+        <div class="risk-tier-badge risk-{{ risk_tier|lower }}">
+
+            Risk tier: {{ risk_tier }}
+
+        </div>
+
+        <div class="coverage-box">
+
+            <p class="coverage-label">Suggested coverage range</p>
+            <p class="coverage-range">KES {{ coverage_low }} &mdash; KES {{ coverage_high }}</p>
+
+        </div>
+
+        <div class="risk-factors">
+
+            <p class="risk-factors-label">Risk factors considered</p>
+
+            <ul>
+                {% for factor in risk_factors %}
+                    <li>{{ factor }}</li>
+                {% endfor %}
+            </ul>
+
+        </div>
+
+        <p class="result-info">
+
+            This assessment combines a machine learning valuation with a
+            rule-based risk score. It is intended to support, not replace,
+            professional underwriting judgment.
+
+        </p>
+
+        <div class="result-actions">
+
+            <a href="/insurance-assessment" class="primary-btn">Assess another property</a>
+            <a href="{{ url_for('download_insurance_report', price=price, risk_tier=risk_tier, coverage_low=coverage_low, coverage_high=coverage_high) }}" class="secondary-btn-dark">Download report</a>
+            <a href="/" class="back-link">← Back to dashboard</a>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

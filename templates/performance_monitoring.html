@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+    <title>Performance Monitoring — Admin</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+
+<body>
+
+
+<div class="auth-bar">
+
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+
+</div>
+
+
+<div class="admin-page">
+
+    <a href="/admin" class="back-link">← Back to dashboard</a>
+
+    <p class="eyebrow">System administrator</p>
+
+    <h1>Performance monitoring</h1>
+
+    <p class="role-home-subtext">
+        Model accuracy metrics, computed against the current training dataset.
+    </p>
+
+    <div class="metrics-grid">
+
+        <div class="metrics-card">
+
+            <h3>Sale model</h3>
+
+            <div class="metric-row">
+                <span class="metric-label">MAE</span>
+                <span class="metric-value">KES {{ sale_metrics.mae }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">RMSE</span>
+                <span class="metric-value">KES {{ sale_metrics.rmse }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">R&sup2;</span>
+                <span class="metric-value">{{ sale_metrics.r2 }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">Rows evaluated</span>
+                <span class="metric-value">{{ sale_metrics.n_rows }}</span>
+            </div>
+
+        </div>
+
+        <div class="metrics-card">
+
+            <h3>Rental model</h3>
+
+            <div class="metric-row">
+                <span class="metric-label">MAE</span>
+                <span class="metric-value">KES {{ rental_metrics.mae }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">RMSE</span>
+                <span class="metric-value">KES {{ rental_metrics.rmse }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">R&sup2;</span>
+                <span class="metric-value">{{ rental_metrics.r2 }}</span>
+            </div>
+
+            <div class="metric-row">
+                <span class="metric-label">Rows evaluated</span>
+                <span class="metric-value">{{ rental_metrics.n_rows }}</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="metrics-card metrics-card-wide">
+
+        <h3>System usage</h3>
+
+        <div class="metric-row">
+            <span class="metric-label">Total registered users</span>
+            <span class="metric-value">{{ usage.total_users }}</span>
+        </div>
+
+        <div class="metric-row">
+            <span class="metric-label">Property owners</span>
+            <span class="metric-value">{{ usage.owner_count }}</span>
+        </div>
+
+        <div class="metric-row">
+            <span class="metric-label">Insurance officers</span>
+            <span class="metric-value">{{ usage.insurance_count }}</span>
+        </div>
+
+        <div class="metric-row">
+            <span class="metric-label">Admins</span>
+            <span class="metric-value">{{ usage.admin_count }}</span>
+        </div>
+
+    </div>
+
+    <p class="metrics-note">
+        Note: MAE/RMSE/R&sup2; here are computed by re-running the current model
+        against its own training dataset (an in-sample check), not a held-out
+        test set. Treat these as a sanity check on model fit, not a true
+        generalization metric.
+    </p>
+
+
+</div>
+
+
+<footer class="site-footer">
+
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+
+</footer>
+
+
+</body>
+
+
+</html>

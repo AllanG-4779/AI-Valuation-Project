@@ -107,6 +107,19 @@ body{
 }
 
 
+.hero-text .eyebrow{
+
+    color:var(--gold);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+
+    margin-bottom:16px;
+
+}
+
+
 .hero-text p{
 
     margin-top:22px;
@@ -682,6 +695,714 @@ body{
         font-size:36px;
 
     }
+
+}
+
+
+/* ============================================
+   Role-specific home pages (insurance/admin)
+   ============================================ */
+
+.role-home{
+
+    max-width:640px;
+    margin:0 auto;
+
+    padding:100px 24px 80px;
+
+    text-align:center;
+
+}
+
+
+.role-home .eyebrow{
+
+    color:var(--gold);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+
+    margin-bottom:14px;
+
+}
+
+
+.role-home h1{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:38px;
+
+    color:var(--brown-950);
+
+}
+
+
+.role-home-subtext{
+
+    margin-top:14px;
+    margin-bottom:32px;
+
+    font-size:16px;
+
+    color:var(--brown-600);
+
+}
+
+
+.role-home .primary-btn{
+
+    margin-top:0;
+
+}
+
+
+/* ---------- Admin dashboard ---------- */
+
+.admin-page{
+
+    max-width:880px;
+    margin:0 auto;
+
+    padding:80px 24px;
+
+}
+
+
+.admin-page .eyebrow{
+
+    color:var(--gold);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+
+    margin-bottom:14px;
+
+}
+
+
+.admin-page h1{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:36px;
+
+    color:var(--brown-950);
+
+}
+
+
+.admin-grid{
+
+    margin-top:40px;
+
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:20px;
+
+}
+
+
+.admin-card{
+
+    background:var(--white);
+
+    border-radius:16px;
+
+    padding:28px;
+
+    border:1px solid rgba(28,20,13,0.06);
+
+    box-shadow:0 4px 20px rgba(28,20,13,0.05);
+
+}
+
+
+.admin-card h3{
+
+    font-size:17px;
+    font-weight:700;
+
+    color:var(--brown-950);
+
+    margin-bottom:8px;
+
+}
+
+
+.admin-card p{
+
+    font-size:14.5px;
+
+    color:var(--brown-600);
+
+    line-height:1.5;
+
+}
+
+
+.admin-status{
+
+    display:inline-block;
+
+    margin-top:14px;
+
+    padding:5px 14px;
+
+    background:var(--cream);
+
+    border-radius:50px;
+
+    font-size:12.5px;
+    font-weight:600;
+
+    color:var(--brown-600);
+
+}
+
+
+.admin-card-link{
+
+    text-decoration:none;
+
+    display:block;
+
+    transition:transform .2s ease, box-shadow .2s ease;
+
+}
+
+
+.admin-card-link:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 8px 28px rgba(28,20,13,0.1);
+
+}
+
+
+/* ---- Admin tables ---- */
+
+.admin-table-wrap{
+
+    margin-top:24px;
+
+    overflow-x:auto;
+
+    background:var(--white);
+
+    border-radius:16px;
+
+    border:1px solid rgba(28,20,13,0.06);
+
+}
+
+
+.admin-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+
+.admin-table th{
+
+    text-align:left;
+
+    padding:14px 18px;
+
+    font-size:13px;
+    font-weight:700;
+
+    text-transform:uppercase;
+    letter-spacing:.4px;
+
+    color:var(--brown-600);
+
+    background:var(--cream);
+
+    border-bottom:1px solid #E7DDD0;
+
+    white-space:nowrap;
+
+}
+
+
+.admin-table td{
+
+    padding:14px 18px;
+
+    font-size:14.5px;
+
+    color:var(--brown-950);
+
+    border-bottom:1px solid #F0E9DD;
+
+    white-space:nowrap;
+
+}
+
+
+.admin-table-small th,
+.admin-table-small td{
+
+    padding:10px 14px;
+
+    font-size:13px;
+
+}
+
+
+.role-badge{
+
+    display:inline-block;
+
+    padding:4px 12px;
+
+    border-radius:50px;
+
+    font-size:12px;
+    font-weight:700;
+
+    text-transform:capitalize;
+
+}
+
+
+.role-owner{
+
+    background:#E3EEFB;
+    color:#2A5FA3;
+
+}
+
+
+.role-insurance{
+
+    background:#FCF1DC;
+    color:#A6740E;
+
+}
+
+
+.role-admin{
+
+    background:#F1E3FB;
+    color:#7B3FA3;
+
+}
+
+
+.inline-form{
+
+    display:flex;
+    gap:8px;
+    align-items:center;
+
+}
+
+
+.role-select{
+
+    padding:6px 10px;
+
+    border:1px solid #E7DDD0;
+    border-radius:6px;
+
+    font-size:13px;
+
+    font-family:'Inter', sans-serif;
+
+}
+
+
+.table-btn{
+
+    padding:6px 14px;
+
+    background:var(--brown-950);
+    color:var(--cream);
+
+    border:none;
+    border-radius:6px;
+
+    font-size:12.5px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:background .2s ease;
+
+}
+
+
+.table-btn:hover{
+
+    background:var(--brown-800);
+
+}
+
+
+.self-label{
+
+    font-size:13px;
+
+    color:var(--brown-600);
+
+    font-style:italic;
+
+}
+
+
+/* ---- Dataset tabs ---- */
+
+.dataset-tabs{
+
+    display:flex;
+    gap:10px;
+
+    margin-top:24px;
+    margin-bottom:8px;
+
+}
+
+
+.dataset-tab{
+
+    padding:10px 22px;
+
+    border-radius:50px;
+
+    font-size:14px;
+    font-weight:600;
+
+    color:var(--brown-600);
+
+    background:var(--white);
+
+    border:1px solid #E7DDD0;
+
+    text-decoration:none;
+
+    transition:all .2s ease;
+
+}
+
+
+.dataset-tab:hover{
+
+    border-color:var(--gold);
+
+}
+
+
+.dataset-tab-active{
+
+    background:var(--brown-950);
+    color:var(--gold-light);
+
+    border-color:var(--brown-950);
+
+}
+
+
+.add-row-section{
+
+    margin-top:36px;
+
+}
+
+
+.add-row-submit{
+
+    margin-top:24px;
+
+}
+
+
+/* ---- Metrics ---- */
+
+.metrics-grid{
+
+    margin-top:32px;
+
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:20px;
+
+}
+
+
+.metrics-card{
+
+    background:var(--white);
+
+    border-radius:16px;
+
+    padding:28px;
+
+    border:1px solid rgba(28,20,13,0.06);
+
+    box-shadow:0 4px 20px rgba(28,20,13,0.05);
+
+}
+
+
+.metrics-card-wide{
+
+    grid-column:1 / -1;
+
+    margin-top:20px;
+
+}
+
+
+.metrics-card h3{
+
+    font-size:17px;
+    font-weight:700;
+
+    color:var(--brown-950);
+
+    margin-bottom:18px;
+
+}
+
+
+.metric-row{
+
+    display:flex;
+    justify-content:space-between;
+
+    padding:10px 0;
+
+    border-bottom:1px solid #F0E9DD;
+
+}
+
+
+.metric-row:last-child{
+
+    border-bottom:none;
+
+}
+
+
+.metric-label{
+
+    font-size:14px;
+
+    color:var(--brown-600);
+
+}
+
+
+.metric-value{
+
+    font-size:14.5px;
+    font-weight:700;
+
+    color:var(--brown-950);
+
+}
+
+
+.metrics-note{
+
+    margin-top:24px;
+
+    font-size:13.5px;
+    line-height:1.6;
+
+    color:var(--brown-600);
+
+    max-width:640px;
+
+}
+
+
+.retrain-info{
+
+    font-size:13.5px;
+
+    color:var(--brown-600);
+
+    margin-bottom:16px;
+
+}
+
+
+.form-success{
+
+    background:#E8F5EC !important;
+    border-color:#B8DCC4 !important;
+
+}
+
+
+.form-success p{
+
+    color:#2D7A4A;
+
+}
+
+
+@media (max-width: 640px){
+
+    .metrics-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+
+@media (max-width: 640px){
+
+    .admin-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+
+/* ---------- Insurance risk result ---------- */
+
+.result-card-wide{
+
+    max-width:640px;
+
+}
+
+
+.risk-tier-badge{
+
+    display:inline-block;
+
+    margin:20px 0;
+
+    padding:10px 24px;
+
+    border-radius:50px;
+
+    font-weight:700;
+    font-size:14.5px;
+
+    letter-spacing:.3px;
+
+}
+
+
+.risk-low{
+
+    background:#E3F2E8;
+    color:#2D7A4A;
+
+}
+
+
+.risk-medium{
+
+    background:#FCF1DC;
+    color:#A6740E;
+
+}
+
+
+.risk-high{
+
+    background:#FBEAEA;
+    color:#9B3B3B;
+
+}
+
+
+.coverage-box{
+
+    background:var(--cream);
+
+    border-radius:14px;
+
+    padding:20px;
+
+    margin-bottom:24px;
+
+}
+
+
+.coverage-label{
+
+    font-size:13px;
+    font-weight:600;
+
+    color:var(--brown-600);
+
+    text-transform:uppercase;
+    letter-spacing:.5px;
+
+    margin-bottom:6px;
+
+}
+
+
+.coverage-range{
+
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:22px;
+
+    color:var(--brown-950);
+
+}
+
+
+.risk-factors{
+
+    text-align:left;
+
+    margin-bottom:24px;
+
+}
+
+
+.risk-factors-label{
+
+    font-size:13px;
+    font-weight:600;
+
+    color:var(--brown-600);
+
+    text-transform:uppercase;
+    letter-spacing:.5px;
+
+    margin-bottom:10px;
+
+}
+
+
+.risk-factors ul{
+
+    padding-left:20px;
+
+}
+
+
+.risk-factors li{
+
+    font-size:14.5px;
+
+    color:var(--brown-800);
+
+    line-height:1.6;
+
+    margin-bottom:6px;
 
 }
 

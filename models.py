@@ -18,7 +18,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="owner")
-    # role values: "owner" (Property Owner/Buyer) or "insurance" (Insurance Officer)
+    # role values: "owner" (Property Owner/Buyer), "insurance" (Insurance Officer),
+    # or "admin" (System Administrator)
 
     def set_password(self, raw_password):
         self.password_hash = generate_password_hash(raw_password)
