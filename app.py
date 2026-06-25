@@ -35,7 +35,19 @@ from models import db, User
 from auth_decorators import role_required
 
 from io import BytesIO
-from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_LEFT
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+    HRFlowable,
+)
 
 
 # -----------------------------
@@ -189,7 +201,7 @@ def home():
             return render_template("insurance_home.html")
 
         if current_user.role == "admin":
-            return render_template("admin_dashboard.html")
+            return render_template("admin_home.html")
 
     return render_template(
         "index.html"
@@ -456,6 +468,14 @@ def sale():
 
 
 
+        # Snapshot the human-readable values BEFORE prepare_sale_input runs,
+        # since it encodes text fields (neighborhood, condition, etc.) into
+        # numbers in place. Without this, the result page would display
+        # encoded integers instead of what the user actually typed.
+        display_data = data.copy()
+
+
+
         df = prepare_sale_input(
             data,
             sale_encoders
@@ -474,7 +494,8 @@ def sale():
 
         return render_template(
             "sale_result.html",
-            price=f"{round(prediction):,}"
+            price=f"{round(prediction):,}",
+            data=display_data
         )
 
 
@@ -484,6 +505,232 @@ def sale():
     )
 
 
+# SHARED PDF REPORT BUILDER
+# Used by download_sale_report, download_rental_report, and
+# download_insurance_report — one consistent, formal layout for all
+# three report types via ReportLab Platypus (proper flowing document
+# layout, not raw canvas coordinates).
+
+BROWN_DARK = colors.HexColor("#1C140D")
+BROWN_MID = colors.HexColor("#6B4A30")
+GOLD = colors.HexColor("#C9A24B")
+CREAM = colors.HexColor("#F5E9D8")
+
+PROPERTY_LABELS = {
+    "neighborhood": "Neighborhood",
+    "town": "Town",
+    "property_type": "Property Type",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "floor_size_sqm": "Floor Size",
+    "year_built": "Year Built",
+    "condition": "Condition",
+    "furnishing": "Furnishing",
+    "distance_to_cbd_km": "Distance to CBD",
+    "parking_spaces": "Parking Spaces",
+    "floor_number": "Floor Number",
+}
+
+
+def build_pdf_report(report_title, subtitle, price_label, price_value, property_args, extra_sections=None):
+    """
+    Builds a formal, well-laid-out PDF report and returns it as bytes.
+
+    report_title: main heading, e.g. "AI Property Valuation Report"
+    subtitle: small label under the heading, e.g. "Sale Valuation"
+    price_label: e.g. "Estimated Sale Price"
+    price_value: e.g. "8,571,000" (already formatted, no "KES" prefix)
+    property_args: a dict (typically request.args) containing raw property
+        detail values, keyed by the same field names used elsewhere in
+        the app (neighborhood, town, property_type, etc.) — human-readable
+        text values, NOT label-encoded numbers.
+    extra_sections: optional list of (heading, [(label, value), ...]) tuples
+        for additional sections, e.g. insurance risk details.
+    """
+
+    buffer = BytesIO()
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        topMargin=22 * mm,
+        bottomMargin=22 * mm,
+        leftMargin=22 * mm,
+        rightMargin=22 * mm,
+    )
+
+    styles = getSampleStyleSheet()
+
+    title_style = ParagraphStyle(
+        "ReportTitle",
+        parent=styles["Title"],
+        fontName="Helvetica-Bold",
+        fontSize=20,
+        textColor=BROWN_DARK,
+        alignment=TA_LEFT,
+        spaceAfter=2,
+    )
+
+    subtitle_style = ParagraphStyle(
+        "ReportSubtitle",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=10,
+        textColor=BROWN_MID,
+        spaceAfter=16,
+    )
+
+    price_label_style = ParagraphStyle(
+        "PriceLabel",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=10,
+        textColor=colors.white,
+        spaceAfter=4,
+    )
+
+    price_value_style = ParagraphStyle(
+        "PriceValue",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=24,
+        textColor=colors.white,
+    )
+
+    section_heading_style = ParagraphStyle(
+        "SectionHeading",
+        parent=styles["Heading2"],
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        textColor=BROWN_DARK,
+        spaceBefore=16,
+        spaceAfter=10,
+    )
+
+    disclaimer_style = ParagraphStyle(
+        "Disclaimer",
+        parent=styles["Normal"],
+        fontName="Helvetica-Oblique",
+        fontSize=8.5,
+        textColor=BROWN_MID,
+        leading=12,
+    )
+
+    footer_style = ParagraphStyle(
+        "Footer",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=8.5,
+        textColor=BROWN_MID,
+    )
+
+    story = []
+
+    story.append(Paragraph(report_title, title_style))
+    story.append(Paragraph(subtitle, subtitle_style))
+
+    story.append(HRFlowable(width="100%", thickness=1, color=GOLD, spaceAfter=16))
+
+    # Price highlight box, built as a single-cell table so it gets a
+    # solid background color (Platypus has no simple "colored box" Flowable).
+    price_table = Table(
+        [[Paragraph(price_label, price_label_style)],
+         [Paragraph(f"KES {price_value}", price_value_style)]],
+        colWidths=[doc.width],
+    )
+
+    price_table.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), BROWN_DARK),
+        ("LEFTPADDING", (0, 0), (-1, -1), 16),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 16),
+        ("TOPPADDING", (0, 0), (-1, 0), 14),
+        ("BOTTOMPADDING", (0, -1), (-1, -1), 16),
+        ("TOPPADDING", (0, 1), (-1, 1), 2),
+    ]))
+
+    story.append(price_table)
+    story.append(Spacer(1, 20))
+
+    # Property details section
+    story.append(Paragraph("Property Details", section_heading_style))
+
+    detail_rows = []
+
+    for field_key, label in PROPERTY_LABELS.items():
+        if field_key not in property_args:
+            continue
+
+        value = property_args.get(field_key, "-")
+
+        if field_key == "floor_size_sqm" and value not in ("-", None, ""):
+            value = f"{value} sqm"
+        elif field_key == "distance_to_cbd_km" and value not in ("-", None, ""):
+            value = f"{value} km"
+
+        detail_rows.append([label, str(value)])
+
+    if detail_rows:
+
+        detail_table = Table(detail_rows, colWidths=[doc.width * 0.4, doc.width * 0.6])
+
+        detail_table.setStyle(TableStyle([
+            ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+            ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
+            ("FONTSIZE", (0, 0), (-1, -1), 10.5),
+            ("TEXTCOLOR", (0, 0), (0, -1), BROWN_MID),
+            ("TEXTCOLOR", (1, 0), (1, -1), BROWN_DARK),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+            ("TOPPADDING", (0, 0), (-1, -1), 8),
+            ("LINEBELOW", (0, 0), (-1, -2), 0.5, colors.HexColor("#E7DDD0")),
+        ]))
+
+        story.append(detail_table)
+
+    # Any extra sections (e.g. risk tier, coverage range for insurance reports)
+    if extra_sections:
+
+        for heading, rows in extra_sections:
+
+            story.append(Paragraph(heading, section_heading_style))
+
+            extra_table = Table(
+                [[label, str(value)] for label, value in rows],
+                colWidths=[doc.width * 0.4, doc.width * 0.6],
+            )
+
+            extra_table.setStyle(TableStyle([
+                ("FONTNAME", (0, 0), (0, -1), "Helvetica-Bold"),
+                ("FONTNAME", (1, 0), (1, -1), "Helvetica"),
+                ("FONTSIZE", (0, 0), (-1, -1), 10.5),
+                ("TEXTCOLOR", (0, 0), (0, -1), BROWN_MID),
+                ("TEXTCOLOR", (1, 0), (1, -1), BROWN_DARK),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 8),
+                ("LINEBELOW", (0, 0), (-1, -2), 0.5, colors.HexColor("#E7DDD0")),
+            ]))
+
+            story.append(extra_table)
+
+    story.append(Spacer(1, 24))
+    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#E7DDD0"), spaceAfter=12))
+
+    story.append(Paragraph(
+        "This figure was generated using a machine learning model trained on "
+        "property features, location, and market data across Kenya. It is an "
+        "estimate, not a formal appraisal.",
+        disclaimer_style
+    ))
+
+    story.append(Spacer(1, 16))
+    story.append(Paragraph("Generated by PropAI", footer_style))
+
+    doc.build(story)
+
+    buffer.seek(0)
+
+    return buffer.getvalue()
+
+
 @app.route("/download_sale_report")
 @login_required
 @role_required("owner")
@@ -491,48 +738,15 @@ def download_sale_report():
 
     price = request.args.get("price")
 
-
-    buffer = BytesIO()
-
-    pdf = canvas.Canvas(buffer)
-
-
-    pdf.setFont(
-        "Helvetica",
-        16
+    pdf_bytes = build_pdf_report(
+        report_title="AI Property Valuation Report",
+        subtitle="Sale Valuation",
+        price_label="Estimated Sale Price",
+        price_value=price,
+        property_args=request.args,
     )
 
-    pdf.drawString(
-        100,
-        750,
-        "AI Property Valuation Report"
-    )
-
-
-    pdf.drawString(
-        100,
-        700,
-        f"Estimated Sale Price: KES {price}"
-    )
-
-
-    pdf.drawString(
-        100,
-        650,
-        "Generated by PropAI"
-    )
-
-
-    pdf.save()
-
-
-    buffer.seek(0)
-
-
-    response = make_response(
-        buffer.getvalue()
-    )
-
+    response = make_response(pdf_bytes)
 
     response.headers["Content-Type"] = "application/pdf"
 
@@ -607,6 +821,10 @@ def rental():
 
 
 
+        display_data = data.copy()
+
+
+
         df = prepare_rental_input(
             data,
             rental_encoders
@@ -625,7 +843,8 @@ def rental():
 
         return render_template(
             "rental_result.html",
-            price=f"{round(prediction):,}"
+            price=f"{round(prediction):,}",
+            data=display_data
         )
 
 
@@ -642,49 +861,15 @@ def download_rental_report():
 
     price = request.args.get("price")
 
-
-    buffer = BytesIO()
-
-    pdf = canvas.Canvas(buffer)
-
-
-    pdf.setFont(
-        "Helvetica",
-        16
+    pdf_bytes = build_pdf_report(
+        report_title="AI Property Valuation Report",
+        subtitle="Rental Valuation",
+        price_label="Estimated Monthly Rent",
+        price_value=price,
+        property_args=request.args,
     )
 
-
-    pdf.drawString(
-        100,
-        750,
-        "AI Property Valuation Report"
-    )
-
-
-    pdf.drawString(
-        100,
-        700,
-        f"Estimated Monthly Rent: KES {price}"
-    )
-
-
-    pdf.drawString(
-        100,
-        650,
-        "Generated by PropAI"
-    )
-
-
-    pdf.save()
-
-
-    buffer.seek(0)
-
-
-    response = make_response(
-        buffer.getvalue()
-    )
-
+    response = make_response(pdf_bytes)
 
     response.headers["Content-Type"] = "application/pdf"
 
@@ -744,6 +929,13 @@ def insurance_assessment():
             ["location_tier"]
         )
 
+        # Snapshot BEFORE prepare_sale_input encodes text fields into
+        # integers in place. assess_risk() needs the original strings
+        # (e.g. "Excellent", "mid") to compare against — without this,
+        # it was silently comparing encoded numbers to string literals
+        # and always falling through to default risk factors.
+        display_data = data.copy()
+
         df = prepare_sale_input(
             data,
             sale_encoders
@@ -757,7 +949,7 @@ def insurance_assessment():
         prediction = sale_model.predict(df)[0]
 
         risk_tier, risk_factors, coverage_low, coverage_high = assess_risk(
-            data, prediction
+            display_data, prediction
         )
 
         return render_template(
@@ -767,6 +959,7 @@ def insurance_assessment():
             risk_factors=risk_factors,
             coverage_low=f"{coverage_low:,.0f}",
             coverage_high=f"{coverage_high:,.0f}",
+            data=display_data,
         )
 
     return render_template("insurance_assessment.html")
@@ -877,32 +1070,23 @@ def download_insurance_report():
     coverage_low = request.args.get("coverage_low")
     coverage_high = request.args.get("coverage_high")
 
-    buffer = BytesIO()
+    risk_section = [
+        ("Risk Assessment", [
+            ("Risk Tier", risk_tier or "-"),
+            ("Suggested Coverage Range", f"KES {coverage_low} - KES {coverage_high}"),
+        ])
+    ]
 
-    pdf = canvas.Canvas(buffer)
-
-    pdf.setFont("Helvetica", 16)
-
-    pdf.drawString(100, 750, "PropAI Insurance Risk Assessment Report")
-
-    pdf.setFont("Helvetica", 12)
-
-    pdf.drawString(100, 710, f"Estimated Property Value: KES {price}")
-
-    pdf.drawString(100, 685, f"Risk Tier: {risk_tier}")
-
-    pdf.drawString(
-        100, 660,
-        f"Suggested Coverage Range: KES {coverage_low} - KES {coverage_high}"
+    pdf_bytes = build_pdf_report(
+        report_title="PropAI Insurance Risk Assessment Report",
+        subtitle="Insurance Risk Assessment",
+        price_label="Estimated Property Value",
+        price_value=price,
+        property_args=request.args,
+        extra_sections=risk_section,
     )
 
-    pdf.drawString(100, 620, "Generated by PropAI")
-
-    pdf.save()
-
-    buffer.seek(0)
-
-    response = make_response(buffer.getvalue())
+    response = make_response(pdf_bytes)
 
     response.headers["Content-Type"] = "application/pdf"
     response.headers["Content-Disposition"] = (
@@ -920,6 +1104,18 @@ def download_insurance_report():
 @login_required
 @role_required("admin")
 def admin_dashboard():
+
+    # Kept for backward compatibility with existing links/bookmarks —
+    # the actual dashboard now lives at /admin/dashboard, reached via
+    # the admin landing page's "Get started" button.
+
+    return redirect(url_for("admin_dashboard_grid"))
+
+
+@app.route("/admin/dashboard")
+@login_required
+@role_required("admin")
+def admin_dashboard_grid():
 
     return render_template("admin_dashboard.html")
 
@@ -1292,11 +1488,12 @@ def add_property_row():
             f"it in future predictions."
         )
 
-        if missing_columns:
-            success_message += (
-                f" Note: this CSV has columns this form doesn't set "
-                f"({', '.join(missing_columns)}) — they were left blank for this row."
-            )
+        
+        #if missing_columns:
+            #success_message += (
+                #f" Note: this CSV has columns this form doesn't set "
+                #f"({', '.join(missing_columns)}) — they were left blank for this row."
+            #)
 
         flash(success_message)
 

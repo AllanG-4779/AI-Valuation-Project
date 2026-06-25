@@ -1128,4 +1128,5 @@ property_id,listing_type,property_type,neighborhood,town,bedrooms,bathrooms,park
 2402.0,For Sale,Townhouse,Naivasha Town,Naivasha,4,3,3,64,,2010,0,New,Unfurnished,0,0,0,0,1,0,0,1.0,mid,7100000.0
 2408.0,For Sale,Townhouse,Naivasha Town,Naivasha,4,3,1,87,,2017,0,Excellent,Furnished,0,0,0,0,1,0,0,1.0,mid,10700000.0
 ,,Apartment,Pipeline,Nakuru,2,2,2,120,,2020,3,Good,Unfurnished,0,0,0,0,1,0,0,15.0,affordable,
-2409.0,For Sale,Townhouse,Pipeline,Nakuru,4,5,1,120,,2015,2,Excellent,Unfurnished,0,0,0,0,1,1,1,15,affordable,17500500
+2409.0,For Sale,Townhouse,Pipeline,Nakuru,4,5,1,120,,2015,2,Excellent,Unfurnished,0,0,0,0,1,1,1,15.0,affordable,17500500.0
+2410.0,For Sale,Bungalow,Ngata,Nakuru,3,2,2,5000,,2017,1,Excellent,Unfurnished,0,0,0,0,1,0,1,17,affordable,10500000

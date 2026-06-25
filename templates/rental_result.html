@@ -39,6 +39,56 @@
 
         </div>
 
+        <div class="property-summary">
+
+            <p class="risk-factors-label">Property details</p>
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <span class="summary-label">Location</span>
+                    <span class="summary-value">{{ data.neighborhood }}, {{ data.town }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Property type</span>
+                    <span class="summary-value">{{ data.property_type }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Bedrooms / Bathrooms</span>
+                    <span class="summary-value">{{ data.bedrooms }} bd / {{ data.bathrooms }} ba</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Floor size</span>
+                    <span class="summary-value">{{ data.floor_size_sqm }} sqm</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Year built</span>
+                    <span class="summary-value">{{ data.year_built }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Condition</span>
+                    <span class="summary-value">{{ data.condition }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Furnishing</span>
+                    <span class="summary-value">{{ data.furnishing }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Distance to CBD</span>
+                    <span class="summary-value">{{ data.distance_to_cbd_km }} km</span>
+                </div>
+
+            </div>
+
+        </div>
+
         <p class="result-info">
 
             This figure was generated using a machine learning model trained
@@ -50,7 +100,19 @@
         <div class="result-actions">
 
             <a href="/rental" class="primary-btn">Value another property</a>
-            <a href="{{ url_for('download_rental_report', price=price) }}" class="secondary-btn-dark">Download report</a>
+            <a href="{{ url_for('download_rental_report',
+                price=price,
+                neighborhood=data.neighborhood,
+                town=data.town,
+                property_type=data.property_type,
+                bedrooms=data.bedrooms,
+                bathrooms=data.bathrooms,
+                floor_size_sqm=data.floor_size_sqm,
+                year_built=data.year_built,
+                condition=data.condition,
+                furnishing=data.furnishing,
+                distance_to_cbd_km=data.distance_to_cbd_km
+            ) }}" class="secondary-btn-dark">Download report</a>
             <a href="/" class="back-link">← Back home</a>
 
         </div>

@@ -1280,3 +1280,4 @@ property_id,listing_type,property_type,neighborhood,town,bedrooms,bathrooms,park
 2406,For Rent,Apartment,Naivasha Town,Naivasha,2,1,2,133,,2004,3,New,Furnished,0,0,1,0,1,0,0,1.0,mid,43000
 2407,For Rent,Bungalow,Naivasha Town,Naivasha,3,2,3,167,0.19,2024,0,New,Semi-Furnished,0,0,0,0,1,1,0,1.0,mid,30000
 2409,For Rent,Apartment,Naivasha Town,Naivasha,4,3,1,182,,2017,12,Excellent,Unfurnished,0,0,0,0,1,0,0,1.0,mid,38000
+2410,For Rent,Apartment,Pipeline,Nakuru,2,2,1,120,,2018,1,Fair,Unfurnished,0,0,1,0,0,1,0,10,affordable,15000
