@@ -1,31 +1,16 @@
 <!DOCTYPE html>
 <html>
-
-
 <head>
-
     <title>Rental Valuation Result — AI Property Valuation</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
-
-    <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
-
-
 <body>
 
-
 <div class="result-page">
-
-    <div class="result-card">
+    <div class="result-card result-card-wide">
 
         <p class="eyebrow">Rental valuation complete</p>
-
         <h1>Here's your estimated monthly rent</h1>
 
         <p class="result-subtext">
@@ -33,16 +18,12 @@
         </p>
 
         <div class="price-box">
-
             <span class="currency">KES / month</span>
             <span class="price">{{ price }}</span>
-
         </div>
 
         <div class="property-summary">
-
             <p class="risk-factors-label">Property details</p>
-
             <div class="summary-grid">
 
                 <div class="summary-item">
@@ -86,51 +67,69 @@
                 </div>
 
             </div>
-
         </div>
 
-        <p class="result-info">
+        {% if data.distance_to_school_km or data.crime_index %}
+        <div class="property-summary">
+            <p class="risk-factors-label">Neighborhood factors</p>
+            <div class="summary-grid">
 
+                {% if data.distance_to_school_km %}
+                <div class="summary-item">
+                    <span class="summary-label">Distance to school</span>
+                    <span class="summary-value">{{ data.distance_to_school_km }} km</span>
+                </div>
+                {% endif %}
+
+                {% if data.distance_to_hospital_km %}
+                <div class="summary-item">
+                    <span class="summary-label">Distance to hospital</span>
+                    <span class="summary-value">{{ data.distance_to_hospital_km }} km</span>
+                </div>
+                {% endif %}
+
+                {% if data.crime_index %}
+                <div class="summary-item">
+                    <span class="summary-label">Crime index</span>
+                    <span class="summary-value">
+                        {{ data.crime_index }}
+                        {% set ci = data.crime_index | float %}
+                        {% if ci <= 10 %}<span class="factor-tag factor-low">Low</span>
+                        {% elif ci <= 25 %}<span class="factor-tag factor-medium">Moderate</span>
+                        {% else %}<span class="factor-tag factor-high">High</span>{% endif %}
+                    </span>
+                </div>
+                {% endif %}
+
+                {% if data.road_quality %}
+                <div class="summary-item">
+                    <span class="summary-label">Road quality</span>
+                    <span class="summary-value">{{ data.road_quality }} roads</span>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+        {% endif %}
+
+        <p class="result-info">
             This figure was generated using a machine learning model trained
             on property features, location, and rental market data across Kenya.
             It's an estimate, not a formal appraisal.
-
         </p>
 
         <div class="result-actions">
-
             <a href="/rental" class="primary-btn">Value another property</a>
-            <a href="{{ url_for('download_rental_report',
-                price=price,
-                neighborhood=data.neighborhood,
-                town=data.town,
-                property_type=data.property_type,
-                bedrooms=data.bedrooms,
-                bathrooms=data.bathrooms,
-                floor_size_sqm=data.floor_size_sqm,
-                year_built=data.year_built,
-                condition=data.condition,
-                furnishing=data.furnishing,
-                distance_to_cbd_km=data.distance_to_cbd_km
-            ) }}" class="secondary-btn-dark">Download report</a>
-            <a href="/" class="back-link">← Back home</a>
-
+            <a href="{{ url_for('download_valuation_report', valuation_id=valuation_id) }}" class="secondary-btn-dark">Download report</a>
+            <a href="/dashboard" class="back-link">← Back to dashboard</a>
         </div>
 
     </div>
-
-
 </div>
 
-
 <footer class="site-footer">
-
     <p>PropAI · AI-powered property valuations for the Kenyan market</p>
-
 </footer>
 
-
 </body>
-
-
 </html>

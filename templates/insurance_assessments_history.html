@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Assessments — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="admin-page">
+
+    <a href="/insurance/dashboard" class="back-link">← Back to dashboard</a>
+
+    <p class="eyebrow">Insurance officer</p>
+    <h1>My assessments</h1>
+    <p class="role-home-subtext">{{ total }} saved assessment{{ 's' if total != 1 else '' }}</p>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="form-error {% if 'deleted' in messages[0] or 'updated' in messages[0] %}form-success{% endif %}">
+                {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if assessments %}
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Label / Property</th>
+                    <th>Risk tier</th>
+                    <th>Est. value</th>
+                    <th>Coverage range</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assessments %}
+                <tr>
+                    <td>
+                        <strong>{{ a.label or (a.neighborhood + ', ' + a.town) }}</strong>
+                        {% if a.label %}<br><span style="color:var(--brown-600);font-size:12px;">{{ a.property_type }} · {{ a.neighborhood }}, {{ a.town }}</span>{% endif %}
+                    </td>
+                    <td><span class="risk-tier-badge risk-{{ a.risk_tier|lower }}">{{ a.risk_tier }}</span></td>
+                    <td>KES {{ "{:,}".format(a.predicted_value) }}</td>
+                    <td>KES {{ "{:,}".format(a.coverage_low) }} – {{ "{:,}".format(a.coverage_high) }}</td>
+                    <td>{{ a.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <div class="inline-form">
+                            <a href="{{ url_for('view_insurance_assessment', assessment_id=a.id) }}" class="table-btn">View</a>
+                            <form method="POST" action="{{ url_for('delete_insurance_assessment', assessment_id=a.id) }}"
+                                  onsubmit="return confirm('Delete this assessment?');">
+                                <button type="submit" class="table-btn table-btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <p>No assessments yet. <a href="/insurance-assessment">Run your first assessment →</a></p>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Valuations — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="admin-page">
+
+    <a href="/dashboard" class="back-link">← Back to dashboard</a>
+
+    <p class="eyebrow">Property owner</p>
+    <h1>My valuations</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="form-error {% if 'successfully' in messages[0] or 'deleted' in messages[0] %}form-success{% endif %}">
+                {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="dataset-tabs">
+        <a href="{{ url_for('valuations_history', type='sale') }}"
+           class="dataset-tab {% if active_type == 'sale' %}dataset-tab-active{% endif %}">
+            Sale valuations ({{ sale_count }})
+        </a>
+        <a href="{{ url_for('valuations_history', type='rental') }}"
+           class="dataset-tab {% if active_type == 'rental' %}dataset-tab-active{% endif %}">
+            Rental valuations ({{ rental_count }})
+        </a>
+    </div>
+
+    {% if valuations %}
+
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Label / Property</th>
+                    <th>Estimated price</th>
+                    <th>Bedrooms</th>
+                    <th>Floor size</th>
+                    <th>Condition</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in valuations %}
+                <tr>
+                    <td>
+                        <strong>{{ v.label or (v.neighborhood + ', ' + v.town) }}</strong>
+                        {% if v.label %}
+                            <br><span style="color:var(--brown-600);font-size:12px;">{{ v.property_type }} · {{ v.neighborhood }}, {{ v.town }}</span>
+                        {% else %}
+                            <br><span style="color:var(--brown-600);font-size:12px;">{{ v.property_type }}</span>
+                        {% endif %}
+                    </td>
+                    <td><strong>KES {{ "{:,}".format(v.predicted_price) }}</strong></td>
+                    <td>{{ v.bedrooms }}</td>
+                    <td>{{ v.floor_size_sqm }} sqm</td>
+                    <td>{{ v.condition }}</td>
+                    <td>{{ v.created_at.strftime('%d %b %Y') }}</td>
+                    <td>
+                        <div class="inline-form">
+                            <a href="{{ url_for('view_valuation', valuation_id=v.id) }}" class="table-btn">View</a>
+                            <a href="{{ url_for('edit_valuation', valuation_id=v.id) }}" class="table-btn">Edit</a>
+                            <form method="POST" action="{{ url_for('delete_valuation', valuation_id=v.id) }}"
+                                  onsubmit="return confirm('Delete this valuation? This cannot be undone.');">
+                                <button type="submit" class="table-btn table-btn-danger">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <p>No {{ active_type }} valuations yet.
+            <a href="{{ url_for('sale') if active_type == 'sale' else url_for('rental') }}">
+                Run your first {{ active_type }} valuation →
+            </a>
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>

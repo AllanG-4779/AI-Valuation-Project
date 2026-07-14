@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Valuation — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="form-page">
+
+    <a href="{{ url_for('view_valuation', valuation_id=v.id) }}" class="back-link">← Back to valuation</a>
+
+    <div class="form-header">
+
+        <p class="eyebrow">Edit {{ v.valuation_type }} valuation</p>
+
+        <h1>Update this valuation<span>?</span></h1>
+
+        <p class="subtext">
+            Change any property details below and re-run the model to get an updated estimate.
+            This will update your saved record.
+        </p>
+
+    </div>
+
+    <form method="POST" class="valuation-form">
+
+        <!-- Label -->
+        <div class="form-section">
+            <div class="section-label">
+                <span class="num">✎</span>
+                <h3>Label (optional)</h3>
+            </div>
+            <div class="field">
+                <label>Give this valuation a name</label>
+                <input name="label" class="field-control" placeholder="e.g. Mum's house in Karen" value="{{ v.label or '' }}">
+            </div>
+        </div>
+
+        <!-- Step 01 -->
+        <div class="form-section">
+            <div class="section-label">
+                <span class="num">01</span>
+                <h3>Property type &amp; location</h3>
+            </div>
+            <div class="field-grid">
+
+                <div class="field">
+                    <label>Property type</label>
+                    <select name="property_type" class="field-control">
+                        {% for pt in ['Apartment','Studio','Bungalow','Townhouse','Villa','Maisonette'] %}
+                        <option {% if v.property_type == pt %}selected{% endif %}>{{ pt }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Town</label>
+                    <select id="town" name="town" class="field-control">
+                        {% for t in ['Nairobi','Kiambu','Mombasa','Nakuru','Kisumu','Eldoret','Naivasha','Thika'] %}
+                        <option {% if v.town == t %}selected{% endif %}>{{ t }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field field-wide">
+                    <label>Neighborhood</label>
+                    <select id="neighborhood" name="neighborhood" class="field-control" required>
+                        <option value="{{ v.neighborhood }}" selected>{{ v.neighborhood }}</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Step 02 -->
+        <div class="form-section">
+            <div class="section-label">
+                <span class="num">02</span>
+                <h3>Size &amp; layout</h3>
+            </div>
+            <div class="field-grid">
+                <div class="field field-narrow">
+                    <label>Bedrooms</label>
+                    <input type="number" name="bedrooms" class="field-control" value="{{ v.bedrooms }}">
+                </div>
+                <div class="field field-narrow">
+                    <label>Bathrooms</label>
+                    <input type="number" name="bathrooms" class="field-control" value="{{ v.bathrooms }}">
+                </div>
+                <div class="field">
+                    <label>Floor size (sqm)</label>
+                    <input type="number" name="floor_size_sqm" class="field-control" value="{{ v.floor_size_sqm }}">
+                </div>
+                <div class="field">
+                    <label>Year built</label>
+                    <input type="number" name="year_built" class="field-control" value="{{ v.year_built }}">
+                </div>
+                <div class="field field-narrow">
+                    <label>Parking spaces</label>
+                    <input type="number" name="parking_spaces" class="field-control" value="{{ v.parking_spaces }}">
+                </div>
+                <div class="field field-narrow">
+                    <label>Floor number</label>
+                    <input type="number" name="floor_number" class="field-control" value="{{ v.floor_number }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 03 -->
+        <div class="form-section">
+            <div class="section-label">
+                <span class="num">03</span>
+                <h3>Condition &amp; finish</h3>
+            </div>
+            <div class="field-grid">
+                <div class="field">
+                    <label>Condition</label>
+                    <select name="condition" class="field-control">
+                        {% for c in ['Excellent','Good','Fair','New'] %}
+                        <option {% if v.condition == c %}selected{% endif %}>{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Furnishing</label>
+                    <select name="furnishing" class="field-control">
+                        {% for f in ['Furnished','Semi-Furnished','Unfurnished'] %}
+                        <option {% if v.furnishing == f %}selected{% endif %}>{{ f }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 04 -->
+        <div class="form-section">
+            <div class="section-label">
+                <span class="num">04</span>
+                <h3>Features</h3>
+            </div>
+            <p class="section-hint">Select everything that applies</p>
+            <div class="chip-grid">
+                {% set features = [
+                    ('has_swimming_pool', 'Swimming Pool'),
+                    ('has_gym', 'Gym'),
+                    ('has_security', 'Security'),
+                    ('has_garden', 'Garden'),
+                    ('has_borehole', 'Borehole'),
+                    ('has_backup_generator', 'Generator'),
+                    ('is_gated_community', 'Gated Community'),
+                ] %}
+                {% for field, label in features %}
+                <input type="checkbox" id="{{ field }}" name="{{ field }}" value="1" class="chip-input"
+                       {% if v[field] == 1 %}checked{% endif %}>
+                <label for="{{ field }}" class="chip">{{ label }}</label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="submit-row">
+            <button type="submit" class="primary-btn submit-btn">Re-run valuation</button>
+            <p class="submit-hint">This will update your saved record with the new result</p>
+        </div>
+
+    </form>
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+<script>
+// Pre-load neighborhoods for the saved town on page load
+window.addEventListener('load', function() {
+    const town = document.getElementById('town').value;
+    const savedNeighborhood = "{{ v.neighborhood }}";
+    const vType = "{{ v.valuation_type }}";
+
+    fetch('/get_neighborhoods/' + vType + '/' + town)
+        .then(r => r.json())
+        .then(data => {
+            const sel = document.getElementById('neighborhood');
+            sel.innerHTML = '';
+            data.neighborhoods.forEach(function(n) {
+                const opt = document.createElement('option');
+                opt.value = n;
+                opt.text = n;
+                if (n === savedNeighborhood) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        });
+});
+
+document.getElementById('town').addEventListener('change', function() {
+    const town = this.value;
+    const vType = "{{ v.valuation_type }}";
+    fetch('/get_neighborhoods/' + vType + '/' + town)
+        .then(r => r.json())
+        .then(data => {
+            const sel = document.getElementById('neighborhood');
+            sel.innerHTML = '<option value="">Select neighborhood</option>';
+            data.neighborhoods.forEach(function(n) {
+                const opt = document.createElement('option');
+                opt.value = n;
+                opt.text = n;
+                sel.appendChild(opt);
+            });
+        });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insurance Dashboard — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="dashboard-page">
+
+    <a href="/" class="back-link">← Back home</a>
+
+    <p class="eyebrow">Insurance officer</p>
+    <h1>Dashboard</h1>
+
+    <div class="insurance-dashboard-actions">
+        <a href="/insurance-assessment" class="primary-btn">New assessment</a>
+        <a href="/insurance/assessments" class="primary-btn">View all assessments</a>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stat-strip">
+
+        <div class="stat-item">
+            <span class="stat-value">{{ stats.total }}</span>
+            <span class="stat-label">Total assessments</span>
+        </div>
+
+        <div class="stat-item stat-low">
+            <span class="stat-value">{{ stats.low_count }}</span>
+            <span class="stat-label">Low risk</span>
+        </div>
+
+        <div class="stat-item stat-medium">
+            <span class="stat-value">{{ stats.medium_count }}</span>
+            <span class="stat-label">Medium risk</span>
+        </div>
+
+        <div class="stat-item stat-high">
+            <span class="stat-value">{{ stats.high_count }}</span>
+            <span class="stat-label">High risk</span>
+        </div>
+
+    </div>
+
+    <div class="dashboard-two-col">
+
+        <!-- Recent assessments -->
+        <div class="dashboard-section">
+
+            <div class="dashboard-section-header">
+                <h3>Recent assessments</h3>
+                <a href="/insurance/assessments" class="section-link">View all →</a>
+            </div>
+
+            {% if recent_assessments %}
+
+            <div class="admin-table-wrap">
+                <table class="admin-table admin-table-small">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Risk tier</th>
+                            <th>Value</th>
+                            <th>Date</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in recent_assessments %}
+                        <tr>
+                            <td>
+                                <strong>{{ a.label or (a.neighborhood + ', ' + a.town) }}</strong>
+                                {% if a.label %}<br><span style="color:var(--brown-600);font-size:12px;">{{ a.neighborhood }}, {{ a.town }}</span>{% endif %}
+                            </td>
+                            <td>
+                                <span class="role-badge risk-{{ a.risk_tier|lower }}">{{ a.risk_tier }}</span>
+                            </td>
+                            <td>KES {{ "{:,}".format(a.predicted_value) }}</td>
+                            <td>{{ a.created_at.strftime('%d %b %Y') }}</td>
+                            <td>
+                                <a href="{{ url_for('view_insurance_assessment', assessment_id=a.id) }}" class="table-btn">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <p>No assessments yet. <a href="/insurance-assessment">Run your first assessment →</a></p>
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Risk distribution chart -->
+        <div class="dashboard-section">
+
+            <div class="dashboard-section-header">
+                <h3>Risk distribution</h3>
+            </div>
+
+            {% if stats.total > 0 %}
+
+            <div class="risk-chart">
+
+                {% set low_pct = (stats.low_count / stats.total * 100) | round(1) %}
+                {% set med_pct = (stats.medium_count / stats.total * 100) | round(1) %}
+                {% set high_pct = (stats.high_count / stats.total * 100) | round(1) %}
+
+                <div class="risk-bar-wrap">
+                    <div class="risk-bar-label">Low</div>
+                    <div class="risk-bar-track">
+                        <div class="risk-bar risk-bar-low" style="width: {{ low_pct }}%"></div>
+                    </div>
+                    <div class="risk-bar-value">{{ stats.low_count }} ({{ low_pct }}%)</div>
+                </div>
+
+                <div class="risk-bar-wrap">
+                    <div class="risk-bar-label">Medium</div>
+                    <div class="risk-bar-track">
+                        <div class="risk-bar risk-bar-medium" style="width: {{ med_pct }}%"></div>
+                    </div>
+                    <div class="risk-bar-value">{{ stats.medium_count }} ({{ med_pct }}%)</div>
+                </div>
+
+                <div class="risk-bar-wrap">
+                    <div class="risk-bar-label">High</div>
+                    <div class="risk-bar-track">
+                        <div class="risk-bar risk-bar-high" style="width: {{ high_pct }}%"></div>
+                    </div>
+                    <div class="risk-bar-value">{{ stats.high_count }} ({{ high_pct }}%)</div>
+                </div>
+
+            </div>
+
+            {% else %}
+            <div class="empty-state">
+                <p>Risk distribution will appear here once you have assessments.</p>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>

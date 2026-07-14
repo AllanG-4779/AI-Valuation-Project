@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Valuation Detail — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="result-page">
+
+    <div class="result-card result-card-wide">
+
+        <a href="{{ url_for('valuations_history', type=v.valuation_type) }}" class="back-link" style="display:inline-block;margin-bottom:20px;">← Back to valuations</a>
+
+        <p class="eyebrow">{{ v.valuation_type | capitalize }} valuation</p>
+
+        <h1>{{ v.label or (v.neighborhood + ', ' + v.town) }}</h1>
+
+        <p class="result-subtext">Valued on {{ v.created_at.strftime('%d %B %Y') }}</p>
+
+        <div class="price-box">
+            <span class="currency">{{ 'KES / month' if v.valuation_type == 'rental' else 'KES' }}</span>
+            <span class="price">{{ "{:,}".format(v.predicted_price) }}</span>
+        </div>
+
+        <div class="property-summary">
+
+            <p class="risk-factors-label">Property details</p>
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <span class="summary-label">Location</span>
+                    <span class="summary-value">{{ v.neighborhood }}, {{ v.town }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Property type</span>
+                    <span class="summary-value">{{ v.property_type }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Bedrooms / Bathrooms</span>
+                    <span class="summary-value">{{ v.bedrooms }} bd / {{ v.bathrooms }} ba</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Floor size</span>
+                    <span class="summary-value">{{ v.floor_size_sqm }} sqm</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Year built</span>
+                    <span class="summary-value">{{ v.year_built }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Condition</span>
+                    <span class="summary-value">{{ v.condition }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Furnishing</span>
+                    <span class="summary-value">{{ v.furnishing }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Distance to CBD</span>
+                    <span class="summary-value">{{ v.distance_to_cbd_km }} km</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% if v.distance_to_school_km %}
+        <div class="property-summary">
+
+            <p class="risk-factors-label">Neighborhood factors</p>
+
+            <div class="summary-grid">
+
+                <div class="summary-item">
+                    <span class="summary-label">Distance to school</span>
+                    <span class="summary-value">{{ v.distance_to_school_km }} km</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Distance to hospital</span>
+                    <span class="summary-value">{{ v.distance_to_hospital_km }} km</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Crime index</span>
+                    <span class="summary-value">{{ v.crime_index }}</span>
+                </div>
+
+                <div class="summary-item">
+                    <span class="summary-label">Road quality</span>
+                    <span class="summary-value">{{ v.road_quality }}</span>
+                </div>
+
+            </div>
+
+        </div>
+        {% endif %}
+
+        <p class="result-info">
+            This figure was generated using a machine learning model trained on
+            property features, location, and market data across Kenya.
+            It is an estimate, not a formal appraisal.
+        </p>
+
+        <div class="result-actions">
+
+            <a href="{{ url_for('edit_valuation', valuation_id=v.id) }}" class="primary-btn">Edit &amp; re-run</a>
+
+            <a href="{{ url_for('download_valuation_report', valuation_id=v.id) }}" class="secondary-btn-dark">Download report</a>
+
+            <form method="POST" action="{{ url_for('delete_valuation', valuation_id=v.id) }}"
+                  onsubmit="return confirm('Delete this valuation? This cannot be undone.');"
+                  style="display:inline;">
+                <button type="submit" class="secondary-btn-dark" style="cursor:pointer;border:1.5px solid #E8B4B4;color:#9B3B3B;">Delete</button>
+            </form>
+
+            <a href="{{ url_for('valuations_history', type=v.valuation_type) }}" class="back-link">← Back</a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard — PropAI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="dashboard-page">
+
+    <a href="/" class="back-link">← Back home</a>
+
+    <p class="eyebrow">Property owner</p>
+    <h1>Dashboard</h1>
+
+    <div class="user-dashboard-actions" >
+        <a href="/sale" class="primary-btn">Estimate sale price</a>
+        <a href="/rental" class="primary-btn">Estimate rental price</a>
+        <a href="/valuations" class="primary-btn">View all valuations</a>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stat-strip">
+
+        <div class="stat-item">
+            <span class="stat-value">{{ stats.total }}</span>
+            <span class="stat-label">Total valuations</span>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-value">{{ stats.sale_count }}</span>
+            <span class="stat-label">Sale valuations</span>
+        </div>
+
+        <div class="stat-item">
+            <span class="stat-value">{{ stats.rental_count }}</span>
+            <span class="stat-label">Rental valuations</span>
+        </div>
+
+        <!--{% if stats.avg_sale_price %}
+        <div class="stat-item">
+            <span class="stat-value">KES {{ "{:,.0f}".format(stats.avg_sale_price) }}</span>
+            <span class="stat-label">Your avg sale estimate</span>
+        </div>
+        {% endif %} -->
+
+    </div>
+
+    <!-- Recent valuations -->
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+            <h3>Recent valuations</h3>
+            <a href="/valuations" class="section-link">View all →</a>
+        </div>
+
+        {% if recent_valuations %}
+
+        <div class="admin-table-wrap">
+            <table class="admin-table admin-table-small">
+                <thead>
+                    <tr>
+                        <th>Label / Property</th>
+                        <th>Type</th>
+                        <th>Estimated price</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in recent_valuations %}
+                    <tr>
+                        <td>
+                            <strong>{{ v.label or (v.neighborhood + ', ' + v.town) }}</strong>
+                            {% if v.label %}<br><span style="color:var(--brown-600);font-size:12px;">{{ v.neighborhood }}, {{ v.town }}</span>{% endif %}
+                        </td>
+                        <td><span class="role-badge role-{{ v.valuation_type }}">{{ v.valuation_type }}</span></td>
+                        <td><strong>KES {{ "{:,}".format(v.predicted_price) }}</strong></td>
+                        <td>{{ v.created_at.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('view_valuation', valuation_id=v.id) }}" class="table-btn">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+            <p>No valuations yet. <a href="/sale">Run your first valuation →</a></p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Market summary -->
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+            <h3>Market summary</h3>
+            <span class="section-hint-inline">Average prices across Kenyan towns (based on current dataset)</span>
+        </div>
+
+        <div class="metrics-grid">
+
+            {% for row in market_summary %}
+            <div class="metrics-card">
+                <h3>{{ row.town }}</h3>
+
+                <div class="metric-row">
+                    <span class="metric-label">Avg sale price</span>
+                    <span class="metric-value">KES {{ "{:,.0f}".format(row.avg_sale) if row.avg_sale else 'N/A' }}</span>
+                </div>
+
+                <div class="metric-row">
+                    <span class="metric-label">Avg monthly rent</span>
+                    <span class="metric-value">KES {{ "{:,.0f}".format(row.avg_rental) if row.avg_rental else 'N/A' }}</span>
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>

@@ -102,6 +102,52 @@
 
         </div>
 
+        {% if data.distance_to_school_km or data.crime_index %}
+        <div class="property-summary">
+
+            <p class="risk-factors-label">Neighborhood factors</p>
+
+            <div class="summary-grid">
+
+                {% if data.distance_to_school_km %}
+                <div class="summary-item">
+                    <span class="summary-label">Distance to school</span>
+                    <span class="summary-value">{{ data.distance_to_school_km }} km</span>
+                </div>
+                {% endif %}
+
+                {% if data.distance_to_hospital_km %}
+                <div class="summary-item">
+                    <span class="summary-label">Distance to hospital</span>
+                    <span class="summary-value">{{ data.distance_to_hospital_km }} km</span>
+                </div>
+                {% endif %}
+
+                {% if data.crime_index %}
+                <div class="summary-item">
+                    <span class="summary-label">Crime index</span>
+                    <span class="summary-value">
+                        {{ data.crime_index }}
+                        {% set ci = data.crime_index | float %}
+                        {% if ci <= 10 %}<span class="factor-tag factor-low">Low</span>
+                        {% elif ci <= 25 %}<span class="factor-tag factor-medium">Moderate</span>
+                        {% else %}<span class="factor-tag factor-high">High</span>{% endif %}
+                    </span>
+                </div>
+                {% endif %}
+
+                {% if data.road_quality %}
+                <div class="summary-item">
+                    <span class="summary-label">Road quality</span>
+                    <span class="summary-value">{{ data.road_quality }} roads</span>
+                </div>
+                {% endif %}
+
+            </div>
+
+        </div>
+        {% endif %}
+
         <div class="risk-factors">
 
             <p class="risk-factors-label">Risk factors considered</p>
@@ -125,23 +171,8 @@
         <div class="result-actions">
 
             <a href="/insurance-assessment" class="primary-btn">Assess another property</a>
-            <a href="{{ url_for('download_insurance_report',
-                price=price,
-                risk_tier=risk_tier,
-                coverage_low=coverage_low,
-                coverage_high=coverage_high,
-                neighborhood=data.neighborhood,
-                town=data.town,
-                property_type=data.property_type,
-                bedrooms=data.bedrooms,
-                bathrooms=data.bathrooms,
-                floor_size_sqm=data.floor_size_sqm,
-                year_built=data.year_built,
-                condition=data.condition,
-                furnishing=data.furnishing,
-                distance_to_cbd_km=data.distance_to_cbd_km
-            ) }}" class="secondary-btn-dark">Download report</a>
-            <a href="/" class="back-link">← Back to dashboard</a>
+            <a href="{{ url_for('download_insurance_assessment_report', assessment_id=assessment_id) }}" class="secondary-btn-dark">Download report</a>
+            <a href="/insurance/dashboard" class="back-link">← Back to dashboard</a>
 
         </div>
 

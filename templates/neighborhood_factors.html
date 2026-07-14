@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Neighborhood Factors — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .nf-input {
+            width: 80px;
+            padding: 6px 8px;
+            border: 1px solid #e0d8d0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+        .nf-select {
+            padding: 6px 8px;
+            border: 1px solid #e0d8d0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            background: white;
+            min-width: 80px;
+        }
+        .nf-town-label {
+            background: #f5f0eb;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #6b4a30;
+        }
+        .form-error {
+            background: #fee;
+            border-left: 4px solid #c00;
+            padding: 12px 16px;
+            margin: 16px 0;
+            border-radius: 6px;
+        }
+        .form-success {
+            background: #e8f5e9;
+            border-left-color: #2e7d32;
+        }
+        .form-error p {
+            margin: 0;
+        }
+        .empty-table-cell {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+        .metrics-note {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: #f8f6f3;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #5a4a3a;
+            line-height: 1.6;
+        }
+        .metrics-note strong {
+            color: #3d2b1f;
+        }
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .pagination-page {
+            font-size: 14px;
+            color: #6b4a30;
+        }
+        .pagination-info {
+            font-size: 14px;
+            color: #8a7a6a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-bar">
+    <span class="auth-greeting">Hi, {{ current_user.full_name.split(' ')[0] }}</span>
+    <a href="/logout" class="auth-link">Log out</a>
+</div>
+
+<div class="admin-page">
+
+    <a href="/admin/dashboard" class="back-link">← Back to dashboard</a>
+
+    <p class="eyebrow">System administrator</p>
+    <h1>Neighborhood factors</h1>
+
+    <p class="role-home-subtext">
+        These location-level factors influence both property valuations and
+        insurance risk scores. Only administrators can edit them — users
+        never type these values manually. Changes take effect after retraining
+        the models from the <a href="/admin/retrain" style="color:var(--gold);">Model Retraining</a> page.
+    </p>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="form-error {% if 'Updated' in messages[0] or 'Retrain' in messages[0] %}form-success{% endif %}">
+                {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Search -->
+    <form method="GET" action="{{ url_for('neighborhood_factors') }}" class="dataset-search-form">
+        <input type="text" name="q" class="field-control dataset-search-input"
+               placeholder="Search by neighborhood or town..."
+               value="{{ search_query }}">
+        <button type="submit" class="primary-btn dataset-search-btn">Search</button>
+        {% if search_query %}
+            <a href="{{ url_for('neighborhood_factors') }}" class="back-link dataset-clear-link">Clear</a>
+        {% endif %}
+    </form>
+
+    <div class="admin-table-wrap">
+        <table class="admin-table admin-table-small">
+            <thead>
+                <tr>
+                    <th>Neighborhood</th>
+                    <th>Town</th>
+                    <th>School (km)</th>
+                    <th>Hospital (km)</th>
+                    <th>Crime index</th>
+                    <th>Road quality</th>
+                    <th>Save</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td><strong>{{ row.neighborhood }}</strong></td>
+                    <td><span class="nf-town-label">{{ row.town }}</span></td>
+
+                    <form method="POST" action="{{ url_for('update_neighborhood_factor') }}">
+
+                        <input type="hidden" name="neighborhood" value="{{ row.neighborhood }}">
+                        <input type="hidden" name="town" value="{{ row.town }}">
+
+                        <td>
+                            <input type="number" step="0.1" name="distance_to_school_km"
+                                   class="nf-input"
+                                   value="{{ row.distance_to_school_km if row.distance_to_school_km is not none else '' }}"
+                                   placeholder="km" required>
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.1" name="distance_to_hospital_km"
+                                   class="nf-input"
+                                   value="{{ row.distance_to_hospital_km if row.distance_to_hospital_km is not none else '' }}"
+                                   placeholder="km" required>
+                        </td>
+
+                        <td>
+                            <input type="number" step="0.1" name="crime_index"
+                                   class="nf-input"
+                                   value="{{ row.crime_index if row.crime_index is not none else '' }}"
+                                   placeholder="0–100" required>
+                        </td>
+
+                        <td>
+                            <select name="road_quality" class="nf-select">
+                                {% for rq in ['Paved', 'Mixed', 'Murram'] %}
+                                <option value="{{ rq }}" {% if row.road_quality == rq %}selected{% endif %}>{{ rq }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+
+                        <td>
+                            <button type="submit" class="table-btn">Save</button>
+                        </td>
+
+                    </form>
+                </tr>
+                {% endfor %}
+
+                {% if rows|length == 0 %}
+                <tr>
+                    <td colspan="7" class="empty-table-cell">No neighborhoods match your search.</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <p class="pagination-info">
+            Showing {{ start_row }}–{{ end_row }} of {{ total }} neighborhoods
+        </p>
+        <div class="pagination-controls">
+            {% if page > 1 %}
+                <a href="{{ url_for('neighborhood_factors', q=search_query, page=page-1) }}" class="table-btn">← Previous</a>
+            {% endif %}
+            <span class="pagination-page">Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('neighborhood_factors', q=search_query, page=page+1) }}" class="table-btn">Next →</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <p class="metrics-note">
+        <strong>Crime index</strong> is a relative measure of crimes reported per 1,000 residents
+        per year in this neighborhood. Lower is safer. Values above 35 are considered high-risk
+        in this system's rule-based insurance scoring.
+        <strong>Road quality</strong> affects insurance risk assessment — Murram (unpaved) roads
+        contribute to a slightly higher risk score.
+    </p>
+
+</div>
+
+<footer class="site-footer">
+    <p>PropAI · AI-powered property valuations for the Kenyan market</p>
+</footer>
+
+</body>
+</html>
